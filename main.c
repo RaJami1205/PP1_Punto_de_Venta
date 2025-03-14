@@ -25,7 +25,7 @@ int main() {
 
     switch(opcion) {
         case 1:
-            printf("Has seleccionado Administracion.\n");
+            printf("Has seleccionado Administracion, sin embargo, no tienes permiso para acceder a esta opcion.\n");
             break;
         case 2:
             printf("Has seleccionado Generales.\n");
