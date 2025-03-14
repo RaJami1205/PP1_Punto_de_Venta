@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 int main() {
-    int opcion;
+    int opcion, subopcion_A, subopcion_G;
 
     printf("==================================\n");
     printf("Bienvenido a Supermercados Walmart\n");
@@ -25,15 +25,81 @@ int main() {
 
     switch(opcion) {
         case 1:
-            printf("Has seleccionado Administracion, sin embargo, no tienes permiso para acceder a esta opcion.\n");
+            printf("\n");
+            printf("====================================\n");
+            printf("    Opciones de Administracion\n");
+            printf("====================================\n");
+            printf("1. Registro de familias de productos\n");
+            printf("2. Registro de productos\n");
+            printf("3. Cargar inventario\n");
+            printf("4. Consulta de facturas\n");
+            printf("5. Estadisticas\n");
+            printf("6. Volver\n");
+            
+            printf("\n");
+            printf("Ingrese la opcion: ");
+            scanf("%d", &subopcion_A);
+
+            switch(subopcion_A) {
+                case 1:
+                    printf("Has seleccionado Registro de familias de productos.\n");
+                    break;
+                case 2:
+                    printf("Has seleccionado Registro de productos.\n");
+                    break;
+                case 3:
+                    printf("Has seleccionado Cargar inventario.\n");
+                    break;
+                case 4:
+                    printf("Has seleccionado Consulta de facturas.\n");
+                    break;
+                case 5:
+                    printf("Has seleccionado Estadísticas.\n");
+                    break;
+                case 6:
+                    printf("\n");
+                    main();
+                    break;
+                default:
+                    printf("Opción inválida en el submenú de administración.\n");
+            }
             break;
+
         case 2:
-            printf("Has seleccionado Generales.\n");
+            printf("\n");
+            printf("=======================\n");
+            printf("  Opciones Generales\n");
+            printf("=======================\n");
+            printf("1. Consulta de Catalogo\n");
+            printf("2. Cotizar\n");
+            printf("3. Facturar\n");
+            printf("4. Salir\n");
+            
+            printf("\n");
+            printf("Ingrese la opcion: ");
+            scanf("%d", &subopcion_G);
+
+            switch(subopcion_G) {
+                case 1:
+                    printf("Has seleccionado Consulta de Catalogo.\n");
+                    break;
+                case 2:
+                    printf("Has seleccionado Cotizar.\n");
+                    break;
+                case 3:
+                    printf("Has seleccionado Facturar.\n");
+                    break;
+                case 4:
+                    printf("Has seleccionado Salir.\n");
+                    return 0;
+                default:
+                    printf("Opción inválida en el submenú de generales.\n");
+            }
             break;
+
         default:
             printf("Opcion invalida. Por favor, ingrese 1 o 2.\n");
             break;
     }
-
     return 0;
 }
