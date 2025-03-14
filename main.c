@@ -49,7 +49,6 @@ void printSubMenuAdmin() {
             break;
 
         case 6:
-            printf("\n");
             main();
             break;
 
