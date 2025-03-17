@@ -5,7 +5,7 @@
  *      
  * Autores:
  *      Raúl Alfaro
- *      Eyden Días
+ *      Eyden Díaz
  */
 #include <stdio.h>
 
@@ -20,7 +20,9 @@ void printSubMenuAdmin() {
     printf("2. Registro de productos\n");
     printf("3. Cargar inventario\n");
     printf("4. Consulta de facturas\n");
-    printf("5. Estadisticas\n");
+    printf("5. Crear cotización\n");
+    printf("6. Finalizar factura\n");
+    printf("7. Estadisticas\n");
     printf("6. Volver\n");
             
     printf("\n");
