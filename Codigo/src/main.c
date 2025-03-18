@@ -8,6 +8,7 @@
  *      Eyden Díaz
  */
 #include <stdio.h>
+#include "Functions/Products.c"
 
 void printSubMenuAdmin() {
     int subopcion_A;
@@ -31,8 +32,9 @@ void printSubMenuAdmin() {
 
     switch(subopcion_A) {
         case 1:
-            printf("Has seleccionado Registro de familias de productos.\n");
-            break;
+            printf("\n");
+            setProductFamily();
+            printSubMenuAdmin();
             
         case 2:
             printf("Has seleccionado Registro de productos.\n");
@@ -126,7 +128,8 @@ int main() {
             break;
 
         case 3:
-            break;
+            printf("Gracias por utilizar el programa.\n");
+            return 0;
 
         default:
             printf("Opcion invalida. Por favor, ingrese 1 o 2.\n");
