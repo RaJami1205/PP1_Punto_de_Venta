@@ -37,8 +37,9 @@ void printSubMenuAdmin() {
             printSubMenuAdmin();
             
         case 2:
-            printf("Has seleccionado Registro de productos.\n");
-            break;
+            printf("\n");
+            setProduct();
+            printSubMenuAdmin();
 
         case 3:
             printf("Has seleccionado Cargar inventario.\n");
