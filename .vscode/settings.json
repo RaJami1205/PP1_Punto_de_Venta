@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "sales_points.h": "c"
+        "sales_points.h": "c",
+        "db_handler.h": "c"
     }
 }
