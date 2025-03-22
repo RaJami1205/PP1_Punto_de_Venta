@@ -1,0 +1,1 @@
+// para funciones relacionadas con los structs
