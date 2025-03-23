@@ -15,6 +15,15 @@ int printMainMenu() {
     return opcion;
 }
 
+bool login() {
+
+    // TO-DO: LÓGICA PARA VERIFICAR CREDENCIALES
+    printf("\nUsuario:\n");
+    printf("Contraseña:\n");
+
+    return true;
+
+}
 
 void printSubMenuAdmin() {
     int subopcion_A;

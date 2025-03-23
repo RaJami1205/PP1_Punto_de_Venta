@@ -11,6 +11,7 @@ MYSQL *connect_to_db() {
         exit(EXIT_FAILURE);
     }
 
+    // TO-DO: CREAR VARIABLES DE ENTORNO PARA MANEJO DE CLAVE Y USUARIO DE BD
     if (mysql_real_connect(conn, "localhost", "root", "1234", "Sales_Points", 0, NULL, 0) == NULL) {
         fprintf(stderr, "Error al conectar a la base de datos: %s\n", mysql_error(conn));
         mysql_close(conn);
@@ -22,6 +23,7 @@ MYSQL *connect_to_db() {
 
 void insert_product_family(MYSQL *conn, const char *name) {
     char query[200];
+    // TO-DO: CAMBIAR LA FORMA DE INSERCION A STORED PROCEDURE O FUNCION
     snprintf(query, sizeof(query), "INSERT INTO Product_Family (name) VALUES ('%s')", name);
 
     if (mysql_query(conn, query)) {
@@ -31,6 +33,7 @@ void insert_product_family(MYSQL *conn, const char *name) {
 
 void insert_product(MYSQL *conn, Product *product) {
     char query[500];
+    // TO-DO: CAMBIAR LA FORMA DE INSERCION A STORED PROCEDURE O FUNCION
     snprintf(query, sizeof(query), "INSERT INTO Product (name, cost, price, stock, product_family_id) VALUES ('%s', '%s', '%s', %d, %d)",
              product->name, product->cost, product->price, product->stock, product->product_family_id);
 

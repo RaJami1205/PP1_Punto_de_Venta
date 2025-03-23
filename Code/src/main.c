@@ -8,7 +8,11 @@ int main() {
         opcion = printMainMenu();
         switch (opcion) {
             case 1:
-                printSubMenuAdmin();
+                if (login()) {
+                    printSubMenuAdmin();
+                } else {
+                    printf("Usuario inválido. Por favor, ingrese credenciales correctas.\n");
+                }
                 break;
             case 2:
                 printSubMenuGeneral();

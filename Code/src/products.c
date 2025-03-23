@@ -82,6 +82,7 @@ void setProduct() {
     // Insertar los productos en la base de datos
     for (int i = 0; i < count; i++) {
         insert_product(conn, &products[i]);
+        // TO-DO: CREAR ALGUN TIPO DE ARRAY PARA LOS PRODUCTOS NO CARGADOS PARA PRINTEARLOS LUEGO EN PANTALLA
     }
 
     // Cerrar la conexión a la base de datos
