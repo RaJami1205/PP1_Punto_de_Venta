@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Iinclude
+CFLAGS = -Wall -Wno-deprecated-declarations -Iinclude
 OBJDIR = obj
 OBJ = $(OBJDIR)/main.o $(OBJDIR)/products.o $(OBJDIR)/db_handler.o $(OBJDIR)/menu.o \
       $(OBJDIR)/quotations.o $(OBJDIR)/invoices.o $(OBJDIR)/models.o
@@ -7,7 +7,7 @@ OBJ = $(OBJDIR)/main.o $(OBJDIR)/products.o $(OBJDIR)/db_handler.o $(OBJDIR)/men
 all: program
 
 program: $(OBJ)
-	$(CC) $(OBJ) -o program -lmysqlclient
+	$(CC) $(OBJ) -o program -lmysqlclient -lcrypto
 
 $(OBJDIR)/%.o: src/%.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@

@@ -7,10 +7,9 @@ INSERT INTO Sales_Point
 VALUES
     ('Mini Super El Exito', '11023456785', '+506 8764 3456');
 
-INSERT INTO Users 
-    (username, password)
-VALUES
-    ('admin', AES_ENCRYPT('1234', UNHEX(SHA2('Lenguajes2025',512))));
+INSERT INTO Users (username, password)
+VALUES ('admin', SHA2('1234', 256));
+
 
 INSERT INTO Product_Family (name) VALUES 
 ('Electrodomésticos'),
