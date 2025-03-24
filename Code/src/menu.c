@@ -4,13 +4,19 @@
 
 int printMainMenu() {
     int opcion;
-    printf("\n==================================\n");
-    printf("Bienvenido a Supermercados Walmart\n");
-    printf("==================================\n");
-    printf("1. Administración\n");
-    printf("2. Generales\n");
-    printf("3. Salir\n\n");
-    printf("Ingrese la opción: ");
+    
+    printf("╔════════════════════════════════════════╗\n");
+    printf("║     🛒  SISTEMA DE PUNTO DE VENTA      ║\n");
+    printf("╠════════════════════════════════════════╣\n");
+    printf("║                OPCIONES                ║\n");
+    printf("║                                        ║\n");
+    printf("║   [1] 📦  Panel Administrativo         ║\n");
+    printf("║   [2] 🛍️  Opciones Generales           ║\n");
+    printf("║   [3] ❌  Salir del Sistema            ║\n");
+    printf("╚════════════════════════════════════════╝\n");
+    
+    printf("\nSeleccione una opción: ");
+
     scanf("%d", &opcion);
     return opcion;
 }
@@ -29,20 +35,20 @@ void printSubMenuAdmin() {
     int subopcion_A;
 
     printf("\n");
-    printf("====================================\n");
-    printf("    Opciones de Administracion\n");
-    printf("====================================\n");
-    printf("1. Registro de familias de productos\n");
-    printf("2. Registro de productos\n");
-    printf("3. Cargar inventario\n");
-    printf("4. Consulta de facturas\n");
-    printf("5. Crear cotización\n");
-    printf("6. Finalizar factura\n");
-    printf("7. Estadisticas\n");
-    printf("6. Volver\n");
-            
-    printf("\n");
-    printf("Ingrese la opcion: ");
+    printf("╔════════════════════════════════════════════╗\n");
+    printf("║        📦 Opciones de Administración       ║\n");
+    printf("╠════════════════════════════════════════════╣\n");
+    printf("║                  OPCIONES                  ║\n");
+    printf("║                                            ║\n");
+    printf("║   [1] 🏷️ Registrar familia de productos    ║\n");
+    printf("║   [2] 🆕 Registrar nuevo producto          ║\n");
+    printf("║   [3] 📦 Cargar inventario                 ║\n");
+    printf("║   [4] 🧾 Consulta de facturas              ║\n");
+    printf("║   [5] 📊 Estadísticas                      ║\n");
+    printf("║   [6] 🔙 Volver                            ║\n");
+    printf("╚════════════════════════════════════════════╝\n");
+
+    printf("\nSeleccione una opción: ");
     scanf("%d", &subopcion_A);
 
     switch(subopcion_A) {
@@ -83,16 +89,18 @@ void printSubMenuGeneral() {
     int subopcion_G;
 
     printf("\n");
-    printf("=======================\n");
-    printf("  Opciones Generales\n");
-    printf("=======================\n");
-    printf("1. Consulta de Catalogo\n");
-    printf("2. Cotizar\n");
-    printf("3. Facturar\n");
-    printf("4. Volver\n");
-            
-    printf("\n");
-    printf("Ingrese la opcion: ");
+    printf("╔════════════════════════════════════╗\n");
+    printf("║        🛍️ Opciones Generales       ║\n");
+    printf("╠════════════════════════════════════╣\n");
+    printf("║             OPCIONES               ║\n");
+    printf("║                                    ║\n");
+    printf("║   [1] 📖 Consulta de Catálogo      ║\n");
+    printf("║   [2] 💰 Cotizar                   ║\n");
+    printf("║   [3] 🧾 Facturar                  ║\n");
+    printf("║   [4] 🔙 Volver                    ║\n");
+    printf("╚════════════════════════════════════╝\n");
+
+    printf("\nIngrese la opcion: ");
     scanf("%d", &subopcion_G);
 
     switch(subopcion_G) {
