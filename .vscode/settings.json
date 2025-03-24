@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "sales_points.h": "c"
+        "sales_points.h": "c",
+        "products.h": "c",
+        "sha.h": "c",
+        "menu.h": "c",
+        "mysql.h": "c",
+        "db_handler.h": "c"
     }
 }
