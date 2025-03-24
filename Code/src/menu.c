@@ -4,7 +4,7 @@
 
 int printMainMenu() {
     int opcion;
-    printf("\n==================a================\n");
+    printf("\n==================================\n");
     printf("Bienvenido a Supermercados Walmart\n");
     printf("==================================\n");
     printf("1. Administración\n");
