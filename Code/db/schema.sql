@@ -22,18 +22,18 @@ CREATE TABLE Users (
 );
 
 CREATE TABLE Product_Family (
-    product_family_id   INT NOT NULL AUTO_INCREMENT,
+    product_family_id   VARCHAR(50) NOT NULL,
     name                VARCHAR(100) NOT NULL UNIQUE,
     PRIMARY KEY (product_family_id)
 );
 
 CREATE TABLE Product (
-    product_id          INT NOT NULL  AUTO_INCREMENT,
+    product_id          VARCHAR(50) NOT NULL,
     name                VARCHAR(100)  NOT NULL UNIQUE,
     cost                DECIMAL(10,2) NOT NULL,
     price               DECIMAL(10,2) NOT NULL,
     stock               INT NOT NULL,
-    product_family_id   INT NOT NULL,
+    product_family_id   VARCHAR(50) NOT NULL,
     PRIMARY KEY (product_id),
     FOREIGN KEY (product_family_id) REFERENCES Product_Family(product_family_id)
 );
@@ -50,7 +50,7 @@ CREATE TABLE Quotation (
 CREATE TABLE Quotation_Lines (
     quotation_line_id   INT NOT NULL AUTO_INCREMENT,
     quotation_id        INT NOT NULL,
-    product_id          INT NOT NULL,
+    product_id          VARCHAR(50) NOT NULL,
     quantity            INT NOT NULL,
     line_sub_total      DECIMAL(15,2) NOT NULL CHECK (line_sub_total >= 0),
     line_total_taxes    DECIMAL(15,2) NOT NULL CHECK (line_total_taxes >= 0),
@@ -75,7 +75,7 @@ CREATE TABLE Invoice (
 CREATE TABLE Invoice_Lines (
     invoice_line_id   INT NOT NULL AUTO_INCREMENT,
     invoice_id        INT NOT NULL,
-    product_id        INT NOT NULL,
+    product_id        VARCHAR(50) NOT NULL,
     quantity          INT NOT NULL,
     line_sub_total    DECIMAL(15,2) NOT NULL CHECK (line_sub_total >= 0),
     line_total_taxes  DECIMAL(15,2) NOT NULL CHECK (line_total_taxes >= 0),

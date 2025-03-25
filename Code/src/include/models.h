@@ -19,16 +19,18 @@ typedef struct {
 
 // Estructura para la familia de productos
 typedef struct {
+    char code[50];
     char name[MAX_LENGTH];
 } Product_Family;
 
 // Estructura para los productos
 typedef struct {
+    char code[50];
     char name[100];
-    char cost[10];
-    char price[10];
+    float cost;
+    float price;
     int stock;
-    int product_family_id;
+    char product_family_id[50];
 } Product;
 
 // Estructura para las cotizaciones

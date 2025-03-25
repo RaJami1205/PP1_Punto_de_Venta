@@ -1,7 +1,2 @@
-Enlatados
-Pastas
-Bebidas
-Juguetes
-Muebles
-Electrodomesticos
-Tecnologia
+Fam1,Enlatados 
+Fam2,Granos básicos

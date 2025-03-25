@@ -10,7 +10,7 @@
 MYSQL *connect_to_db();
 
 // Función para insertar una nueva familia de productos
-void insert_product_family(MYSQL *conn, const char *name);
+void insert_product_family(MYSQL *conn, const char *code, const char *name);
 
 // Función para insertar un nuevo producto
 void insert_product(MYSQL *conn, Product *product);

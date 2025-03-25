@@ -25,10 +25,12 @@ MYSQL *connect_to_db() {
     return conn;
 }
 
-void insert_product_family(MYSQL *conn, const char *name) {
-    char query[200];
-    // TO-DO: CAMBIAR LA FORMA DE INSERCION A STORED PROCEDURE O FUNCION
-    snprintf(query, sizeof(query), "INSERT INTO Product_Family (name) VALUES ('%s')", name);
+void insert_product_family(MYSQL *conn, const char *code, const char *name) {
+    char query[256];
+
+    snprintf(query, sizeof(query),
+             "INSERT INTO Product_Family (product_family_id, name) VALUES ('%s', '%s')",
+             code, name);
 
     if (mysql_query(conn, query)) {
         fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
@@ -37,9 +39,15 @@ void insert_product_family(MYSQL *conn, const char *name) {
 
 void insert_product(MYSQL *conn, Product *product) {
     char query[500];
-    // TO-DO: CAMBIAR LA FORMA DE INSERCION A STORED PROCEDURE O FUNCION
-    snprintf(query, sizeof(query), "INSERT INTO Product (name, cost, price, stock, product_family_id) VALUES ('%s', '%s', '%s', %d, %d)",
-             product->name, product->cost, product->price, product->stock, product->product_family_id);
+
+    snprintf(query, sizeof(query), "INSERT INTO Product (product_id, name, cost, price, stock, product_family_id) "
+                                   "VALUES ('%s', '%s', %.2f, %.2f, %d, '%s')",
+             product->code,                // product_id
+             product->name,                // name
+             product->cost,                // cost (float)
+             product->price,               // price (float)
+             product->stock,               // stock (int)
+             product->product_family_id);  // product_family_id
 
     if (mysql_query(conn, query)) {
         fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
