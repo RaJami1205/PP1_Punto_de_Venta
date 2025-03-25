@@ -64,7 +64,7 @@ void printSubMenuAdmin() {
     printf("╠════════════════════════════════════════════╣\n");
     printf("║                  OPCIONES                  ║\n");
     printf("║                                            ║\n");
-    printf("║   [1] 🏷️ Registrar familia de productos     ║\n");
+    printf("║   [1] 🏷️  Registrar familia de productos    ║\n");
     printf("║   [2] 🆕 Registrar nuevo producto          ║\n");
     printf("║   [3] 📦 Cargar inventario                 ║\n");
     printf("║   [4] 🧾 Consulta de facturas              ║\n");
