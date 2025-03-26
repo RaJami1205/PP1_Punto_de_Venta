@@ -5,6 +5,9 @@
         "sha.h": "c",
         "menu.h": "c",
         "mysql.h": "c",
-        "db_handler.h": "c"
-    }
+        "db_handler.h": "c",
+        "stdbool.h": "c",
+        "admin_menu.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

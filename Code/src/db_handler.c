@@ -54,40 +54,15 @@ void insert_product(MYSQL *conn, Product *product) {
     }
 }
 
-void get_all_products(MYSQL *conn) {
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-
-    // Llamar al procedimiento almacenado
+MYSQL_RES *get_all_products(MYSQL *conn) {
     if (mysql_query(conn, "CALL GetAllProducts()")) {
         fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
-        return;
+        return NULL;
     }
-
-    // Obtener el conjunto de resultados
-    res = mysql_store_result(conn);
-    if (res == NULL) {
-        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
-        return;
-    }
-
-    // Imprimir los resultados (suponiendo que los campos son: product_id, name, cost, price, stock, product_family_id)
-    printf("Productos Disponibles:\n");
-    while ((row = mysql_fetch_row(res)) != NULL) {
-        printf("Product ID: %s\n", row[0]);           // product_id
-        printf("Name: %s\n", row[1]);                // name
-        printf("Cost: %s\n", row[2]);                // cost
-        printf("Price: %s\n", row[3]);               // price
-        printf("Stock: %s\n", row[4]);               // stock
-        printf("Product Family: %s\n", row[6]);    // product_family
-        printf("\n");
-    }
-
-    // Liberar los resultados
-    mysql_free_result(res);
+    return mysql_store_result(conn);
 }
 
-void delete_product(MYSQL *conn, const char *code) {
+void drop_product(MYSQL *conn, const char *code) {
     if (conn == NULL) {
         fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
         return;
@@ -161,7 +136,6 @@ bool validate_credentials(MYSQL *conn, const char *username, unsigned char *pass
             return true;
         }
     }
-
 }
 
 void close_db_connection(MYSQL *conn) {

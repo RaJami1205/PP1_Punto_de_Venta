@@ -6,7 +6,36 @@
 #define MAX_LINES 100  
 #define MAX_LENGTH 100
 
-void setProductFamily() {
+void print_products() {
+    MYSQL *conn = connect_to_db();
+    if (conn == NULL) {
+        fprintf(stderr, "Error: No se pudo conectar a la base de datos\n");
+        return;
+    }
+
+    MYSQL_RES *res = get_all_products(conn);
+    if (res == NULL) {
+        mysql_close(conn);
+        return;
+    }
+
+    MYSQL_ROW row;
+    printf("Productos Disponibles:\n");
+    while ((row = mysql_fetch_row(res)) != NULL) {
+        printf("Product ID: %s\n", row[0]);           
+        printf("Name: %s\n", row[1]);                
+        printf("Cost: %s\n", row[2]);                
+        printf("Price: %s\n", row[3]);               
+        printf("Stock: %s\n", row[4]);               
+        printf("Product Family: %s\n", row[6]);    
+        printf("\n");
+    }
+
+    mysql_free_result(res);
+    mysql_close(conn);
+}
+
+void set_product_family() {
     Product_Family product_family[MAX_LINES];
 
     char filename[100];
@@ -62,7 +91,7 @@ void setProductFamily() {
     close_db_connection(conn);
 }
 
-void setProduct() {
+void set_product() {
     Product products[MAX_LINES]; 
 
     char filename[100];
@@ -124,23 +153,19 @@ void setProduct() {
     }
 }
 
-void deleteProduct() {
-    // Conectar a la base de datos
-    MYSQL *conn_1 = connect_to_db();
+void delete_product() {
 
-    // Mostrar todos los productos
-    get_all_products(conn_1);
-    mysql_close(conn_1);
-    
+    print_products();
+
     // Pedir al usuario que ingrese el código del producto a eliminar
     char product_id[50];
     printf("Ingrese el ID del producto que desea eliminar: ");
     scanf("%49s", product_id);
 
-    MYSQL *conn_2 = connect_to_db();
+    MYSQL *conn = connect_to_db();
 
-    delete_product(conn_2, product_id);
+    drop_product(conn, product_id);
 
     // Cerrar la conexión
-    mysql_close(conn_2);
+    mysql_close(conn);
 }

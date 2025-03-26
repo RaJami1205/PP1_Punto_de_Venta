@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <openssl/sha.h>
 #include "./include/menu.h"
+#include "./include/admin_menu.h"
+#include "./include/general_menu.h"
 #include "./include/products.h"
 #include "./include/db_handler.h"
 
 #define HASH_SIZE SHA256_DIGEST_LENGTH
 
-int printMainMenu() {
+void print_main_menu() {
     int opcion;
     
     printf("\n\n╔════════════════════════════════════════╗\n");
@@ -22,7 +24,24 @@ int printMainMenu() {
     printf("\nSeleccione una opción: ");
 
     scanf("%d", &opcion);
-    return opcion;
+    switch (opcion) {
+        case 1:
+            if (login()) {
+                print_admin_submenu();
+            } else {
+                printf("Usuario inválido. Por favor, ingrese credenciales correctas.\n");
+            }
+            break;
+        case 2:
+            print_general_submenu();
+            break;
+        case 3:
+            printf("Gracias por utilizar el programa.\n");
+            break;
+        default:
+            printf("Opcion inválida. Por favor, ingrese una opción válida.\n");
+            print_main_menu();
+    }
 }
 
 void hash_passwd(const char *password, unsigned char *hashedPassword) {
@@ -53,106 +72,4 @@ bool login() {
     close_db_connection(conn);
 
     return auth_success;
-}
-
-void printSubMenuAdmin() {
-    int subopcion_A;
-
-    printf("\n");
-    printf("╔════════════════════════════════════════════╗\n");
-    printf("║        📦 Opciones de Administración       ║\n");
-    printf("╠════════════════════════════════════════════╣\n");
-    printf("║                  OPCIONES                  ║\n");
-    printf("║                                            ║\n");
-    printf("║   [1] 🏷️ Registrar familia de productos     ║\n");
-    printf("║   [2] 🆕 Registrar nuevo producto          ║\n");
-    printf("║   [3] ❌ Eliminar producto                 ║\n");
-    printf("║   [4] 📦 Cargar inventario                 ║\n");
-    printf("║   [5] 🧾 Consulta de facturas              ║\n");
-    printf("║   [6] 📊 Estadísticas                      ║\n");
-    printf("║   [7] 🔙 Volver                            ║\n");
-    printf("╚════════════════════════════════════════════╝\n");
-
-    printf("\nSeleccione una opción: ");
-    scanf("%d", &subopcion_A);
-
-    switch(subopcion_A) {
-        case 1:
-            printf("\n");
-            setProductFamily();
-            printSubMenuAdmin();
-            
-        case 2:
-            printf("\n");
-            setProduct();
-            printSubMenuAdmin();
-
-        case 3:
-            deleteProduct();
-            printSubMenuAdmin();
-            break;
-
-        case 4:
-            printf("Has seleccionado Consulta de facturas.\n");
-            break;
-
-        case 5:
-            printf("Has seleccionado Estadísticas.\n");
-            break;
-
-        case 6:
-            main();
-            break;
-        
-        case 7:
-            main();
-            break;
-
-        default:
-            printf("Opción inválida en el submenú de administración.\n");
-            printSubMenuAdmin();
-            break;
-    }
-}
-
-void printSubMenuGeneral() {
-    int subopcion_G;
-
-    printf("\n");
-    printf("╔════════════════════════════════════╗\n");
-    printf("║        🛍️  Opciones Generales       ║\n");
-    printf("╠════════════════════════════════════╣\n");
-    printf("║             OPCIONES               ║\n");
-    printf("║                                    ║\n");
-    printf("║   [1] 📖 Consulta de Catálogo      ║\n");
-    printf("║   [2] 💰 Cotizar                   ║\n");
-    printf("║   [3] 🧾 Facturar                  ║\n");
-    printf("║   [4] 🔙 Volver                    ║\n");
-    printf("╚════════════════════════════════════╝\n");
-
-    printf("\nIngrese la opcion: ");
-    scanf("%d", &subopcion_G);
-
-    switch(subopcion_G) {
-        case 1:
-            printf("Has seleccionado Consulta de Catalogo.\n");
-            break;
-
-        case 2:
-            printf("Has seleccionado Cotizar.\n");
-            break;
-
-        case 3:
-            printf("Has seleccionado Facturar.\n");
-            break;
-
-        case 4:
-            main();
-            break;
-
-        default:
-            printf("Opción inválida en el submenú de generales.\n");
-            printSubMenuGeneral();
-            break;
-    }
 }
