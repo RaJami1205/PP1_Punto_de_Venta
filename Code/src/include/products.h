@@ -6,5 +6,6 @@
 
 void setProductFamily();
 void setProduct();
+void deleteProduct();
 
 #endif /* PRODUCTS_H */

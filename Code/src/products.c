@@ -123,3 +123,24 @@ void setProduct() {
                products[i].product_family_id);
     }
 }
+
+void deleteProduct() {
+    // Conectar a la base de datos
+    MYSQL *conn_1 = connect_to_db();
+
+    // Mostrar todos los productos
+    get_all_products(conn_1);
+    mysql_close(conn_1);
+    
+    // Pedir al usuario que ingrese el código del producto a eliminar
+    char product_id[50];
+    printf("Ingrese el ID del producto que desea eliminar: ");
+    scanf("%49s", product_id);
+
+    MYSQL *conn_2 = connect_to_db();
+
+    delete_product(conn_2, product_id);
+
+    // Cerrar la conexión
+    mysql_close(conn_2);
+}

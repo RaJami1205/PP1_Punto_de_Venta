@@ -54,8 +54,67 @@ void insert_product(MYSQL *conn, Product *product) {
     }
 }
 
-bool validate_credentials(MYSQL *conn, const char *username, unsigned char *password) {
+void get_all_products(MYSQL *conn) {
+    MYSQL_RES *res;
+    MYSQL_ROW row;
 
+    // Llamar al procedimiento almacenado
+    if (mysql_query(conn, "CALL GetAllProducts()")) {
+        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Obtener el conjunto de resultados
+    res = mysql_store_result(conn);
+    if (res == NULL) {
+        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Imprimir los resultados (suponiendo que los campos son: product_id, name, cost, price, stock, product_family_id)
+    printf("Productos Disponibles:\n");
+    while ((row = mysql_fetch_row(res)) != NULL) {
+        printf("Product ID: %s\n", row[0]);           // product_id
+        printf("Name: %s\n", row[1]);                // name
+        printf("Cost: %s\n", row[2]);                // cost
+        printf("Price: %s\n", row[3]);               // price
+        printf("Stock: %s\n", row[4]);               // stock
+        printf("Product Family: %s\n", row[6]);    // product_family
+        printf("\n");
+    }
+
+    // Liberar los resultados
+    mysql_free_result(res);
+}
+
+void delete_product(MYSQL *conn, const char *code) {
+    if (conn == NULL) {
+        fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
+        return;
+    }
+
+    // Crear la consulta para llamar al procedimiento almacenado
+    char query[200];
+    snprintf(query, sizeof(query), "CALL deleteProductById('%s')", code);
+
+    // Ejecutar la consulta
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error al ejecutar el procedimiento: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Obtener el resultado del mensaje del procedimiento almacenado
+    MYSQL_RES *result = mysql_store_result(conn);
+    if (result) {
+        MYSQL_ROW row = mysql_fetch_row(result);
+        if (row) {
+            printf("%s\n", row[0]);  // Imprimir el mensaje devuelto por MySQL
+        }
+        mysql_free_result(result);
+    }
+}
+
+bool validate_credentials(MYSQL *conn, const char *username, unsigned char *password) {
     MYSQL_STMT *stmt;
     MYSQL_BIND bind[2], result_bind[1];
     unsigned char stored_password[HASH_SIZE];

@@ -64,12 +64,13 @@ void printSubMenuAdmin() {
     printf("╠════════════════════════════════════════════╣\n");
     printf("║                  OPCIONES                  ║\n");
     printf("║                                            ║\n");
-    printf("║   [1] 🏷️  Registrar familia de productos    ║\n");
+    printf("║   [1] 🏷️ Registrar familia de productos     ║\n");
     printf("║   [2] 🆕 Registrar nuevo producto          ║\n");
-    printf("║   [3] 📦 Cargar inventario                 ║\n");
-    printf("║   [4] 🧾 Consulta de facturas              ║\n");
-    printf("║   [5] 📊 Estadísticas                      ║\n");
-    printf("║   [6] 🔙 Volver                            ║\n");
+    printf("║   [3] ❌ Eliminar producto                 ║\n");
+    printf("║   [4] 📦 Cargar inventario                 ║\n");
+    printf("║   [5] 🧾 Consulta de facturas              ║\n");
+    printf("║   [6] 📊 Estadísticas                      ║\n");
+    printf("║   [7] 🔙 Volver                            ║\n");
     printf("╚════════════════════════════════════════════╝\n");
 
     printf("\nSeleccione una opción: ");
@@ -87,7 +88,8 @@ void printSubMenuAdmin() {
             printSubMenuAdmin();
 
         case 3:
-            printf("Has seleccionado Cargar inventario.\n");
+            deleteProduct();
+            printSubMenuAdmin();
             break;
 
         case 4:
@@ -99,6 +101,10 @@ void printSubMenuAdmin() {
             break;
 
         case 6:
+            main();
+            break;
+        
+        case 7:
             main();
             break;
 

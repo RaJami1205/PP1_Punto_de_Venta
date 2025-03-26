@@ -15,6 +15,12 @@ void insert_product_family(MYSQL *conn, const char *code, const char *name);
 // Función para insertar un nuevo producto
 void insert_product(MYSQL *conn, Product *product);
 
+//Función para eliminar un producto
+void delete_product(MYSQL *conn, const char *code);
+
+//Función para mostrar los productos disponibles
+void get_all_products(MYSQL *conn);
+
 bool validate_credentials(MYSQL *conn, const char *username, unsigned char *password);
 
 // Función para cerrar la conexión a la base de datos
