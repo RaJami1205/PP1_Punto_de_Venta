@@ -30,6 +30,7 @@ void print_main_menu() {
                 print_admin_submenu();
             } else {
                 printf("Usuario inválido. Por favor, ingrese credenciales correctas.\n");
+                print_main_menu();
             }
             break;
         case 2:
@@ -60,7 +61,7 @@ bool login() {
     printf("\nUsuario: ");
     scanf("%s", username);
     
-    printf("\nContraseña: ");
+    printf("Contraseña: ");
     scanf("%s", password);
 
     hash_passwd(password, hashed_password);

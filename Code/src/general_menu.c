@@ -3,6 +3,8 @@
 #include "./include/menu.h"
 #include "./include/db_handler.h"
 #include "./include/products.h"
+#include "./include/quotations.h"
+#include "./include/invoices.h"
 
 void print_general_submenu() {
     int subopcion_G;
@@ -28,7 +30,7 @@ void print_general_submenu() {
             break;
 
         case 2:
-            printf("Has seleccionado Cotizar.\n");
+            new_quotation();
             break;
 
         case 3:
