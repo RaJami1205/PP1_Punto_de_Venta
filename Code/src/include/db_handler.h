@@ -21,6 +21,8 @@ void drop_product(MYSQL *conn, const char *code);
 //Función para mostrar los productos disponibles
 MYSQL_RES* get_all_products(MYSQL *conn);
 
+void hash_to_hex(const unsigned char *hash, char *hex_str, size_t length);
+
 // Función para verificar login
 bool validate_credentials(MYSQL *conn, const char *username, unsigned char *password);
 
