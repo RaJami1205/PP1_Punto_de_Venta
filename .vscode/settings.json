@@ -7,7 +7,8 @@
         "mysql.h": "c",
         "db_handler.h": "c",
         "stdbool.h": "c",
-        "admin_menu.h": "c"
+        "admin_menu.h": "c",
+        "models.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

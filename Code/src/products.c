@@ -21,18 +21,34 @@ void print_products() {
 
     MYSQL_ROW row;
     printf("Productos Disponibles:\n");
+
+    printf("┌─────┬─────────────────────────┬─────────────────────────┬──────────┬──────────┐\n");
+    printf("│  #  │ Producto                │ Descripción             │ Stock    │ Precio   │\n");
+    printf("├─────┼─────────────────────────┼─────────────────────────┼──────────┼──────────┤\n");
+    
+
+    int width_id = 3, width_product = 23, width_desc = 23, width_stock = 8, width_price = 8;
+
     while ((row = mysql_fetch_row(res)) != NULL) {
-        printf("Product ID: %s\n", row[0]);           
-        printf("Name: %s\n", row[1]);                
-        printf("Cost: %s\n", row[2]);                
-        printf("Price: %s\n", row[3]);               
-        printf("Stock: %s\n", row[4]);               
-        printf("Product Family: %s\n", row[6]);    
-        printf("\n");
+        
+        printf("│ %-*s │ %-*s │ %-*s │ %-*s │ %-*s │\n", 
+               width_id, row[0],    // ID o número
+               width_product, row[1], // Nombre del producto
+               width_desc, row[6],    // Descripción o familia del producto
+               width_stock, row[4],   // Stock
+               width_price, row[3]    // Precio
+        );
     }
 
+    printf("└─────┴─────────────────────────┴─────────────────────────┴──────────┴──────────┘\n");
+
+    
     mysql_free_result(res);
     mysql_close(conn);
+}
+
+void print_filtered_products() {
+    // TO-DO
 }
 
 void set_product_family() {
