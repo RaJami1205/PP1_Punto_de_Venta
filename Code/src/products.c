@@ -128,13 +128,13 @@ void set_product() {
         buffer[strcspn(buffer, "\n")] = 0;  // Eliminar el salto de línea
 
         // Usar sscanf correctamente para leer los valores
-        int n = sscanf(buffer, "%49[^,],%99[^,],%f,%f,%d,%49s",
+        int n = sscanf(buffer, "%49[^,],%99[^,],%49[^,],%f,%f,%d", 
                         products[count].code,
-                        products[count].name, 
+                        products[count].name,
+                        products[count].product_family,
                         &products[count].cost, 
                         &products[count].price, 
-                        &products[count].stock, 
-                        products[count].product_family_id);
+                        &products[count].stock);
 
         // Verificar que se leyeron todos los valores correctamente
         if (n != 6) {
@@ -160,12 +160,13 @@ void set_product() {
     // Imprimir los productos cargados
     printf("Productos cargados:\n");
     for (int i = 0; i < count; i++) {
-        printf("Nombre: %s, Costo: %.2f, Precio: %.2f, Stock: %d, Familia: %s\n",
-               products[i].name, 
-               products[i].cost, 
-               products[i].price, 
-               products[i].stock, 
-               products[i].product_family_id);
+        printf("Código: %s, Nombre: %s, Familia: %s, Costo: %.2f, Precio: %.2f, Stock: %d\n",
+               products[i].code,
+               products[i].name,
+               products[i].product_family,
+               products[i].cost,
+               products[i].price,
+               products[i].stock);
     }
 }
 

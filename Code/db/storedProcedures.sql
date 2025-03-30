@@ -30,3 +30,17 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE GetProductFamilyID(
+    IN p_name VARCHAR(100),
+    OUT p_id VARCHAR(50)
+)
+BEGIN
+    SELECT product_family_id INTO p_id
+    FROM Product_Family
+    WHERE name = p_name;
+END $$
+
+DELIMITER ;
