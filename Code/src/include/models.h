@@ -33,22 +33,28 @@ typedef struct {
     char product_family_id[50];
 } Product;
 
-// Estructura para las cotizaciones
-typedef struct {
-    char sub_total[10];
-    char total_taxes[10];
-    char total[10];
-    char state[100];
-} Quotation;
-
 // Estructura para los las líneas de cotizaciones
 typedef struct {
+    int line_id;
     int quotation_id;
-    int product_id;
+    char product_name[100];
     int quantity;
     char line_sub_total[10];
     char line_total_taxes[10];
 } Quotation_Line;
+
+// Estructura para las cotizaciones
+typedef struct {
+    int id;
+    char sub_total[10];
+    char total_taxes[10];
+    char total[10];
+    char state[100];
+    int num_lines;
+    Quotation_Line *lines;
+} Quotation;
+
+
 
 // Estructura para las facturas
 typedef struct {

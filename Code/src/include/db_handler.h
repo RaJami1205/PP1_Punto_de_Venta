@@ -15,11 +15,14 @@ void insert_product_family(MYSQL *conn, const char *code, const char *name);
 // Función para insertar un nuevo producto
 void insert_product(MYSQL *conn, Product *product);
 
-//Función para eliminar un producto
-void drop_product(MYSQL *conn, const char *code);
+// Función para obtener producto por nombre o id
+MYSQL_RES *search_product(MYSQL *conn, const char *input);
 
 //Función para mostrar los productos disponibles
 MYSQL_RES* get_all_products(MYSQL *conn);
+
+//Función para eliminar un producto
+void drop_product(MYSQL *conn, const char *code);
 
 void hash_to_hex(const unsigned char *hash, char *hex_str, size_t length);
 

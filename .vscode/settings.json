@@ -8,7 +8,11 @@
         "db_handler.h": "c",
         "stdbool.h": "c",
         "admin_menu.h": "c",
-        "models.h": "c"
+        "models.h": "c",
+        "stdio.h": "c",
+        "general_menu.h": "c",
+        "time.h": "c",
+        "stdlib.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

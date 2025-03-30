@@ -60,6 +60,58 @@ void insert_product(MYSQL *conn, Product *product) {
     }
 }
 
+// NOT WORKING
+MYSQL_RES *search_product(MYSQL *conn, const char *input) {
+    // Preparar y ejecutar el procedimiento almacenado
+    MYSQL_STMT *stmt = mysql_stmt_init(conn);
+    if (stmt == NULL) {
+        fprintf(stderr, "mysql_stmt_init() falló\n");
+        return NULL;
+    }
+
+    // Llamada al procedimiento almacenado
+    char query[] = "CALL searchProduct(?)";  // Solo necesitamos un parámetro de entrada
+    if (mysql_stmt_prepare(stmt, query, strlen(query)) != 0) {
+        fprintf(stderr, "mysql_stmt_prepare() falló\n");
+        mysql_stmt_close(stmt);
+        return NULL;
+    }
+
+    // Bind del parámetro de búsqueda (ID o nombre)
+    MYSQL_BIND bind[1];
+    memset(bind, 0, sizeof(bind));
+
+    // Bind para el valor de búsqueda (ID o nombre)
+    bind[0].buffer_type = MYSQL_TYPE_STRING;
+    bind[0].buffer = (char *)input;
+    bind[0].buffer_length = strlen(input);
+
+    if (mysql_stmt_bind_param(stmt, bind) != 0) {
+        fprintf(stderr, "mysql_stmt_bind_param() falló\n");
+        mysql_stmt_close(stmt);
+        return NULL;
+    }
+
+    // Ejecutar el procedimiento
+    if (mysql_stmt_execute(stmt) != 0) {
+        fprintf(stderr, "mysql_stmt_execute() falló\n");
+        mysql_stmt_close(stmt);
+        return NULL;
+    }
+
+    // Almacenar los resultados
+    MYSQL_RES *res = mysql_stmt_result_metadata(stmt);
+    if (res == NULL) {
+        fprintf(stderr, "mysql_stmt_result_metadata() falló\n");
+        mysql_stmt_close(stmt);
+        return NULL;
+    }
+
+    // Cerrar el statement después de obtener los resultados
+    mysql_stmt_close(stmt);
+    return res;
+}
+
 MYSQL_RES *get_all_products(MYSQL *conn) {
     if (mysql_query(conn, "CALL GetAllProducts()")) {
         fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
