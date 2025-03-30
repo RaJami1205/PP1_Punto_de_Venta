@@ -7,7 +7,7 @@
 // Función para imprimir productos en catálogo
 void print_products();
 
-// TO-DO
+// Función para preguntar al usuario método de filtrado de productos y printearlos
 void print_filtered_products();
 
 // Función para agregar nuevas familias de producto

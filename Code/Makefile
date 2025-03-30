@@ -1,9 +1,8 @@
 CC = gcc
 CFLAGS = -Wall -Wno-deprecated-declarations -Iinclude
 OBJDIR = obj
-OBJ = $(OBJDIR)/main.o $(OBJDIR)/products.o $(OBJDIR)/db_handler.o $(OBJDIR)/menu.o \
-      $(OBJDIR)/admin_menu.o $(OBJDIR)/general_menu.o $(OBJDIR)/quotations.o $(OBJDIR)/invoices.o  \
-	  $(OBJDIR)/models.o
+OBJ = $(OBJDIR)/main.o $(OBJDIR)/products.o $(OBJDIR)/db_handler.o $(OBJDIR)/menus.o \
+      $(OBJDIR)/quotations.o $(OBJDIR)/invoices.o $(OBJDIR)/models.o
 
 all: program
 
