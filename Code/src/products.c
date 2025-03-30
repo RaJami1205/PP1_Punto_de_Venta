@@ -4,6 +4,7 @@
 #include "./include/db_handler.h"
 
 #define MAX_LINES 100  
+#define MAX_INPUT 100
 #define MAX_LENGTH 100
 
 void print_products() {
@@ -48,7 +49,48 @@ void print_products() {
 }
 
 void print_filtered_products() {
-    // TO-DO
+    char family_input[MAX_INPUT];
+    while (getchar() != '\n' && getchar() != EOF);
+
+    printf("Ingrese el nombre de la familia de productos a filtrar: ");
+    fgets(family_input, MAX_INPUT, stdin);
+    family_input[strcspn(family_input, "\n")] = '\0';
+
+    MYSQL *conn = connect_to_db();
+    if (!conn) return;
+
+    MYSQL_RES *result = get_products_by_family(conn, family_input);
+    if (!result) {
+        printf("No se encontraron productos para la familia ingresada.\n");
+        close_db_connection(conn);
+        return;
+    }
+
+    printf("\nPRODUCTOS EN LA FAMILIA '%s':\n", family_input);
+
+    printf("┌─────┬─────────────────────────┬─────────────────────────┬──────────┬──────────┐\n");
+    printf("│  #  │ Producto                │ Descripción             │ Stock    │ Precio   │\n");
+    printf("├─────┼─────────────────────────┼─────────────────────────┼──────────┼──────────┤\n");
+    
+    MYSQL_ROW row;
+
+    int width_id = 3, width_product = 23, width_desc = 23, width_stock = 8, width_price = 8;
+
+    while ((row = mysql_fetch_row(result)) != NULL) {
+        
+        printf("│ %-*s │ %-*s │ %-*s │ %-*s │ %-*s │\n", 
+                width_id, row[0],    // ID o número
+                width_product, row[1], // Nombre del producto
+                width_desc, row[6],    // Descripción o familia del producto
+                width_stock, row[4],   // Stock
+                width_price, row[3]    // Precio
+        );
+    }
+
+    printf("└─────┴─────────────────────────┴─────────────────────────┴──────────┴──────────┘\n");
+
+    mysql_free_result(result);
+    close_db_connection(conn);
 }
 
 void set_product_family() {

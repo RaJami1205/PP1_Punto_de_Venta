@@ -1,42 +1,50 @@
 #ifndef QUOTATIONS_H
 #define QUOTATIONS_H
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "models.h"
 #include "db_handler.h"
+#include "products.h"
+#include "menus.h"
 
 #define MAX_INPUT 100
 #define MAX_LINES 100
 
 static Quotation current_quotation;
+static bool edit_quotation = false;
 
-// TO-DO
+// Función para obtener el último id de cotización
 int get_last_quo_id();
 
-// TO-DO
-bool product_exists(const char *input, char *product_name);
+// Función para verificar la existencia de un producto
+bool product_exists(const char *input, Product_EYDEN *product);
 
-// TO-DO
+// Función para manejar las opciones para cotizar producto
 void quote_product(bool is_filtered);
 
-// TO-DO
+// Función para encontrar linea conforme a nombre de producto
+Quotation_Line *find_product_line(const char *product_name);
+
+// Función para agregar linea a la cotización
 void add_product_to_quotation();
 
-// TO-DO
+// Función para remover una línea de la cotización
 void rm_product_from_quotation();
 
-// TO-DO
-void filter_products();
+// Función para consultar si desea salir sin guardar
+void ask_save_quotation();
 
-// TO-DO
+// Función para guardar la cotización en la bd
 void save_quotation();
 
-// TO-DO
+// Función para imprimir la cotización
 void print_quotation();
 
-// TO-DO
+// Función para imprimir el menú de cotización
 void print_quotation_menu();
 
-// TO-DO
+// Función para manejar la creación de nueva cotización
 void new_quotation();
 
 #endif /* QUOTATIONS_H */
