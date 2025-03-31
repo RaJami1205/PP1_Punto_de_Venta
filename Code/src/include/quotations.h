@@ -18,7 +18,7 @@ static bool edit_quotation = false;
 int get_last_quo_id();
 
 // Función para verificar la existencia de un producto
-bool product_exists(const char *input, Product_EYDEN *product);
+bool product_exists(const char *input, Product *product);
 
 // Función para manejar las opciones para cotizar producto
 void quote_product(bool is_filtered);

@@ -1,11 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include "./include/models.h"
-#include "./include/db_handler.h"
-
-#define MAX_LINES 100  
-#define MAX_INPUT 100
-#define MAX_LENGTH 100
+#include "./include/products.h"
 
 void print_products() {
     MYSQL *conn = connect_to_db();
@@ -172,7 +165,7 @@ void set_product() {
         int n = sscanf(buffer, "%49[^,],%99[^,],%49[^,],%f,%f,%d", 
                         products[count].code,
                         products[count].name,
-                        products[count].product_family,
+                        products[count].family,
                         &products[count].cost, 
                         &products[count].price, 
                         &products[count].stock);
@@ -204,7 +197,7 @@ void set_product() {
         printf("Código: %s, Nombre: %s, Familia: %s, Costo: %.2f, Precio: %.2f, Stock: %d\n",
                products[i].code,
                products[i].name,
-               products[i].product_family,
+               products[i].family,
                products[i].cost,
                products[i].price,
                products[i].stock);

@@ -21,7 +21,7 @@ int get_last_quo_id() {
     return last_id;
 }
 
-bool product_exists(const char *input, Product_EYDEN *product) {
+bool product_exists(const char *input, Product *product) {
     MYSQL *conn = connect_to_db();
     if (conn == NULL) {
         return false;
@@ -105,7 +105,7 @@ void add_product_to_quotation() {
 
     char product_input[MAX_INPUT];
     int quantity;
-    Product_EYDEN selected_product;
+    Product selected_product;
 
     while (getchar() != '\n' && getchar() != EOF);
 
