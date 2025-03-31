@@ -27,6 +27,16 @@ BEGIN
     END IF;
 END $$
 
+CREATE PROCEDURE GetProductFamilyID(
+    IN p_name VARCHAR(100),
+    OUT p_id VARCHAR(50)
+)
+BEGIN
+    SELECT product_family_id INTO p_id
+    FROM Product_Family
+    WHERE name = p_name;
+END $$
+
 -- Procedimiento para buscar productos por valor de búsqueda
 CREATE PROCEDURE searchProduct(IN p_search_value VARCHAR(50))
 BEGIN

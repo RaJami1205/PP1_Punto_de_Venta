@@ -2,7 +2,7 @@
 #define MODELS_H
 
 #define MAX_LINES 100  
-#define MAX_LENGTH 100 
+#define MAX_LENGTH 256 
 
 // Estructura para el usuario administrador
 typedef struct {
@@ -30,7 +30,7 @@ typedef struct {
     float cost;
     float price;
     int stock;
-    char product_family_id[50];
+    char product_family[50];
 } Product;
 
 
