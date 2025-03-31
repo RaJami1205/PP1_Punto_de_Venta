@@ -1,9 +1,6 @@
 #ifndef MODELS_H
 #define MODELS_H
 
-#define MAX_LINES 100  
-#define MAX_LENGTH 256 
-
 // Estructura para el usuario administrador
 typedef struct {
     char username[50];
@@ -20,23 +17,8 @@ typedef struct {
 // Estructura para la familia de productos
 typedef struct {
     char code[50];
-    char name[MAX_LENGTH];
-} Product_Family;
-
-// Estructura para los productos
-typedef struct {
-    char code[50];
     char name[100];
-    float cost;
-    float price;
-    int stock;
-    char product_family[50];
-} Product;
-
-
-/*
- TEMPORAL
-*/
+} Product_Family;
 
 // Estructura para los productos
 typedef struct {
@@ -46,13 +28,7 @@ typedef struct {
     float cost;
     float price;
     int stock;
-} Product_EYDEN;
-
-/*
- TEMPORAL
-*/
-
-
+} Product;
 
 // Estructura para los las líneas de cotizaciones
 typedef struct {
@@ -70,7 +46,7 @@ typedef struct {
     int id;
     float sub_total;
     float total_taxes;
-    char total[10];
+    float total;
     char state[100];
     int num_lines;
     Quotation_Line *lines;

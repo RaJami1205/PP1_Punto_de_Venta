@@ -1,6 +1,5 @@
 #include "./include/quotations.h"
 
-
 int get_last_quo_id() {
     MYSQL *conn = connect_to_db();
     if (!conn) {
@@ -22,7 +21,7 @@ int get_last_quo_id() {
     return last_id;
 }
 
-bool product_exists(const char *input, Product_EYDEN *product) {
+bool product_exists(const char *input, Product *product) {
     MYSQL *conn = connect_to_db();
     if (conn == NULL) {
         return false;
@@ -106,7 +105,7 @@ void add_product_to_quotation() {
 
     char product_input[MAX_INPUT];
     int quantity;
-    Product_EYDEN selected_product;
+    Product selected_product;
 
     while (getchar() != '\n' && getchar() != EOF);
 
@@ -125,7 +124,6 @@ void add_product_to_quotation() {
         add_product_to_quotation();
         return;
     }
-
 
     bool correct_quantity = false;
 
@@ -150,9 +148,24 @@ void add_product_to_quotation() {
         }
         // Si el producto ya está en la cotización, actualizar cantidad y total
 
+
+        if (existing_line->quantity + quantity > selected_product.stock) {
+            printf("\nError: No hay más cantidad en stock para agregar.\n");
+            quote_product(false);
+            return;
+        }
+
+        current_quotation.sub_total -= existing_line->line_sub_total;
+        current_quotation.total_taxes -= existing_line->line_total_taxes;
+
         existing_line->quantity += quantity;
         existing_line->line_sub_total = existing_line->price * existing_line->quantity;
         existing_line->line_total_taxes = existing_line->line_sub_total * 0.13;
+
+        current_quotation.sub_total += current_quotation.lines->line_sub_total;
+        current_quotation.total_taxes += current_quotation.lines->line_total_taxes;
+        current_quotation.total = current_quotation.sub_total + current_quotation.total_taxes;
+
         printf("\nCantidad actualizada en la cotización.\n");
     } else {
         // Agregar nuevo producto a la cotización
@@ -172,6 +185,9 @@ void add_product_to_quotation() {
         new_line->line_sub_total = selected_product.price * quantity;
         new_line->line_total_taxes = new_line->line_sub_total * 0.13;
 
+        current_quotation.sub_total += current_quotation.lines->line_sub_total;
+        current_quotation.total_taxes += current_quotation.lines->line_total_taxes;
+        current_quotation.total = current_quotation.sub_total + current_quotation.total_taxes;
         current_quotation.num_lines++;
 
         printf("\nProducto agregado correctamente.\n");
@@ -192,7 +208,7 @@ void add_product_to_quotation() {
 
 void rm_product_from_quotation() {
     int line_to_remove;
-    
+
     if (current_quotation.num_lines == 0) {
         printf("\nNo hay productos en la cotización para eliminar.\n");
         print_quotation_menu();
@@ -213,16 +229,27 @@ void rm_product_from_quotation() {
         return;
     }
 
-    // Eliminar la línea especificada
     int index_to_remove = line_to_remove - 1;
+    Quotation_Line *line = &current_quotation.lines[index_to_remove];
+
+    // Actualizamos los totales de la cotización
+    current_quotation.sub_total -= line->line_sub_total;
+    current_quotation.total_taxes -= line->line_total_taxes;
+    current_quotation.total = current_quotation.sub_total + current_quotation.total_taxes;
 
     // Desplazar las líneas restantes para llenar el espacio vacío
     for (int i = index_to_remove; i < current_quotation.num_lines - 1; i++) {
         current_quotation.lines[i] = current_quotation.lines[i + 1];
     }
 
+    // Acomodar los IDs de las líneas restantes
+    for (int i = index_to_remove; i < current_quotation.num_lines - 1; i++) {
+        current_quotation.lines[i].line_id = i + 1;  // Reasignar los IDs (empezando desde 1)
+    }
+
     current_quotation.num_lines--;
 
+    // Reasignar memoria para evitar desperdicio
     current_quotation.lines = realloc(current_quotation.lines, current_quotation.num_lines * sizeof(Quotation_Line));
     if (current_quotation.num_lines > 0 && current_quotation.lines == NULL) {
         printf("\nError al reasignar memoria.\n");
@@ -230,10 +257,12 @@ void rm_product_from_quotation() {
         return;
     }
 
-    printf("\nProducto eliminado correctamente.\n");
+    printf("\nLínea eliminada correctamente.\n");
 
     print_quotation_menu();
 }
+
+
 
 void ask_save_quotation() {
     if (current_quotation.num_lines == 0) {
@@ -271,14 +300,27 @@ void save_quotation() {
         print_quotation_menu();
     }
 
+    MYSQL *conn = connect_to_db();
+    if (!conn) {
+        printf("\nError al conectar con la base de datos.\n");
+        return;
+    }
+
     if (edit_quotation) {
 
-    } else {
-        MYSQL *conn = connect_to_db();
-        if (!conn) {
-            printf("\nError al conectar con la base de datos.\n");
-            return;
+        // Insertar la cotización en la base de datos
+        update_quotation(conn, &current_quotation);
+    
+        for (int i = 0; i < current_quotation.num_lines; i++) {
+            current_quotation.lines[i].quotation_id = current_quotation.id;
+            update_quotation_lines(conn, &current_quotation.lines[i]);
         }
+
+        delete_modified_quotation_lines(conn, &current_quotation);
+    
+        printf("\nCotización actualizada exitosamente.\n");
+    } else {
+
     
         // Insertar la cotización en la base de datos
         create_quotation(conn, &current_quotation);
@@ -288,13 +330,45 @@ void save_quotation() {
             add_line_to_quotation(conn, &current_quotation.lines[i]);
         }
     
-        close_db_connection(conn);
         printf("\nCotización guardada exitosamente.\n");
     }
+    close_db_connection(conn);
+    print_general_submenu();
 }
 
+void print_all_quotations(bool show_all) {
+    MYSQL *conn = connect_to_db();
+    if (!conn) {
+        printf("\nError al conectar con la base de datos.\n");
+        return;
+    }
+
+    MYSQL_RES *result = get_quotations(conn, show_all);
+    if (!result) {
+        printf("\nError al obtener las cotizaciones.\n");
+        close_db_connection(conn);
+        return;
+    }
+
+    MYSQL_ROW row;
+    printf("\nListado de Cotizaciones:\n");
+    printf("┌───────────────┬───────────────┐\n");
+    printf("│ ID Cotización │ Total         │\n");
+    printf("├───────────────┼───────────────┤\n");
+
+    while ((row = mysql_fetch_row(result))) {
+        printf("│ %-13s │ %-13s │\n", row[0], row[1]);
+    }
+
+    printf("└───────────────┴───────────────┘\n");
+
+    mysql_free_result(result);
+    close_db_connection(conn);
+}
+
+
 void print_quotation() {
-    printf("\n                          COTIZACIÓN N°%d\n", current_quotation.id);
+    printf("\n                                      COTIZACIÓN N°%d\n", current_quotation.id);
     printf("┌─────────┬──────────────────────────────┬─────────┬─────────────┬───────────────┬───────────┐\n");
     printf("│ # Línea │ Producto                     │ Cant    │ Precio      │ Subtotal      │ IVA       │\n");
     printf("├─────────┼──────────────────────────────┼─────────┼─────────────┼───────────────┼───────────┤\n");
@@ -309,6 +383,9 @@ void print_quotation() {
                current_quotation.lines[i].line_total_taxes);
     }
     printf("└─────────┴──────────────────────────────┴─────────┴─────────────┴───────────────┴───────────┘\n");
+    printf("\n                                                                   Subtotal :      %-9.2f  \n", current_quotation.sub_total);
+    printf("                                                                   IVA Total:      %-9.2f  \n", current_quotation.total_taxes);
+    printf("                                                                   Total    :      %-9.2f  \n", current_quotation.total);
 
 }
 
@@ -357,5 +434,103 @@ void new_quotation() {
     current_quotation.lines = NULL;
 
     printf("\nCOTIZACIÓN N°%d", current_quotation.id);
+    print_quotation_menu();
+}
+
+void search_quotation(int quotation_id) {
+    MYSQL *conn = connect_to_db();
+    if (!conn) {
+        printf("\nError al conectar con la base de datos.\n");
+        return;
+    }
+
+    // Obtener cotización
+    MYSQL_RES *quotation_result = get_quotation_by_id(conn, quotation_id);
+    if (!quotation_result) {
+        printf("\nNo se encontró la cotización con ID %d.\n", quotation_id);
+        close_db_connection(conn);
+        return;
+    }
+
+    // Asignar datos de la cotización a current_quotation
+    MYSQL_ROW row = mysql_fetch_row(quotation_result);
+    if (!row) {
+        printf("\nNo se encontraron datos para la cotización.\n");
+        mysql_free_result(quotation_result);
+        close_db_connection(conn);
+        return;
+    }
+
+    current_quotation.id = atoi(row[0]);
+    current_quotation.sub_total = atof(row[1]);
+    current_quotation.total_taxes = atof(row[2]);
+    current_quotation.total = atof(row[3]);
+    strncpy(current_quotation.state, row[4], sizeof(current_quotation.state) - 1);
+    current_quotation.num_lines = 0;
+    current_quotation.lines = NULL;
+
+    mysql_free_result(quotation_result);
+    close_db_connection(conn);
+}
+
+void search_quotation_lines(int quotation_id) {
+    MYSQL *conn = connect_to_db();
+    MYSQL_ROW row;
+    // Obtener líneas de cotización
+    MYSQL_RES *lines_result = get_quotation_lines(conn, quotation_id);
+    if (!lines_result) {
+        printf("\nError al obtener las líneas de la cotización.\n");
+        close_db_connection(conn);
+        return;
+    }
+
+    int num_lines = mysql_num_rows(lines_result);
+    if (num_lines > 0) {
+        current_quotation.lines = malloc(num_lines * sizeof(Quotation_Line));
+        if (!current_quotation.lines) {
+            printf("\nError al asignar memoria.\n");
+            mysql_free_result(lines_result);
+            close_db_connection(conn);
+            return;
+        }
+        
+        int i = 0;
+        while ((row = mysql_fetch_row(lines_result))) {
+            current_quotation.lines[i].line_id = atoi(row[0]);
+            current_quotation.lines[i].quotation_id = atoi(row[1]);
+            strncpy(current_quotation.lines[i].product_name, row[2], sizeof(current_quotation.lines[i].product_name) - 1);
+            current_quotation.lines[i].quantity = atoi(row[3]);
+            current_quotation.lines[i].price = atof(row[4]);
+            current_quotation.lines[i].line_sub_total = atof(row[5]);
+            current_quotation.lines[i].line_total_taxes = atof(row[6]);
+            i++;
+        }
+        current_quotation.num_lines = num_lines;
+        printf("%d", current_quotation.num_lines);
+
+    }
+
+    mysql_free_result(lines_result);
+    close_db_connection(conn);
+}
+
+void modify_quotation() {
+    edit_quotation = true;
+
+    print_all_quotations(false);
+
+    int quotation_id;
+    printf("\nModificar Cotización\n");
+    printf("Seleccione una cotización mediante su ID\n= ");
+    
+    if (scanf("%d", &quotation_id) != 1 || quotation_id <= 0) {
+        printf("\nID inválido. Intente de nuevo.\n");
+        return;
+    }
+
+    search_quotation(quotation_id);
+    search_quotation_lines(quotation_id);
+
+    printf("\nCotización cargada correctamente.\n");
     print_quotation_menu();
 }

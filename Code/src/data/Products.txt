@@ -1,2 +1,2 @@
-Prod1,Atún,Enlatados,500.3,655.4,45 
-Prod2,Arroz,Granos básicos,500.3,655.4,45
+Prod1,Atun,Enlatados,500.3,655.4,45 
+Prod2,Arroz,Granos basicos,500.3,655.4,45

@@ -1,8 +1,15 @@
 #ifndef PRODUCTS_H
 #define PRODUCTS_H
 
+#include <stdio.h>
+#include <string.h>
 #include "models.h"
 #include "db_handler.h"
+#include "models.h"
+
+#define MAX_LINES 100  
+#define MAX_INPUT 100
+#define MAX_LENGTH 100
 
 // Función para imprimir productos en catálogo
 void print_products();

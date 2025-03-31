@@ -1,11 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include "./include/models.h"
-#include "./include/db_handler.h"
-
-#define MAX_LINES 100  
-#define MAX_INPUT 100
-#define MAX_LENGTH 100
+#include "./include/products.h"
 
 void print_products() {
     MYSQL *conn = connect_to_db();
@@ -23,12 +16,11 @@ void print_products() {
     MYSQL_ROW row;
     printf("Productos Disponibles:\n");
 
-    printf("┌─────┬─────────────────────────┬─────────────────────────┬──────────┬──────────┐\n");
-    printf("│  #  │ Producto                │ Descripción             │ Stock    │ Precio   │\n");
-    printf("├─────┼─────────────────────────┼─────────────────────────┼──────────┼──────────┤\n");
+    printf("┌────────────┬─────────────────────────┬─────────────────────────┬──────────┬──────────┐\n");
+    printf("│ ID         │ Producto                │ Descripción             │ Stock    │ Precio   │\n");
+    printf("├────────────┼─────────────────────────┼─────────────────────────┼──────────┼──────────┤\n");
     
-
-    int width_id = 3, width_product = 23, width_desc = 23, width_stock = 8, width_price = 8;
+    int width_id = 10, width_product = 23, width_desc = 23, width_stock = 8, width_price = 8;
 
     while ((row = mysql_fetch_row(res)) != NULL) {
         
@@ -41,7 +33,7 @@ void print_products() {
         );
     }
 
-    printf("└─────┴─────────────────────────┴─────────────────────────┴──────────┴──────────┘\n");
+    printf("└────────────┴─────────────────────────┴─────────────────────────┴──────────┴──────────┘\n");
 
     
     mysql_free_result(res);
@@ -68,13 +60,13 @@ void print_filtered_products() {
 
     printf("\nPRODUCTOS EN LA FAMILIA '%s':\n", family_input);
 
-    printf("┌─────┬─────────────────────────┬─────────────────────────┬──────────┬──────────┐\n");
-    printf("│  #  │ Producto                │ Descripción             │ Stock    │ Precio   │\n");
-    printf("├─────┼─────────────────────────┼─────────────────────────┼──────────┼──────────┤\n");
+    printf("┌────────────┬─────────────────────────┬─────────────────────────┬──────────┬──────────┐\n");
+    printf("│ ID         │ Producto                │ Descripción             │ Stock    │ Precio   │\n");
+    printf("├────────────┼─────────────────────────┼─────────────────────────┼──────────┼──────────┤\n");
     
     MYSQL_ROW row;
 
-    int width_id = 3, width_product = 23, width_desc = 23, width_stock = 8, width_price = 8;
+    int width_id = 10, width_product = 23, width_desc = 23, width_stock = 8, width_price = 8;
 
     while ((row = mysql_fetch_row(result)) != NULL) {
         
@@ -87,7 +79,7 @@ void print_filtered_products() {
         );
     }
 
-    printf("└─────┴─────────────────────────┴─────────────────────────┴──────────┴──────────┘\n");
+    printf("└────────────┴─────────────────────────┴─────────────────────────┴──────────┴──────────┘\n");
 
     mysql_free_result(result);
     close_db_connection(conn);
@@ -171,7 +163,7 @@ void set_product() {
         int n = sscanf(buffer, "%49[^,],%99[^,],%49[^,],%f,%f,%d", 
                         products[count].code,
                         products[count].name,
-                        products[count].product_family,
+                        products[count].family,
                         &products[count].cost, 
                         &products[count].price, 
                         &products[count].stock);
@@ -203,7 +195,7 @@ void set_product() {
         printf("Código: %s, Nombre: %s, Familia: %s, Costo: %.2f, Precio: %.2f, Stock: %d\n",
                products[i].code,
                products[i].name,
-               products[i].product_family,
+               products[i].family,
                products[i].cost,
                products[i].price,
                products[i].stock);
