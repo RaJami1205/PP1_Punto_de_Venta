@@ -55,55 +55,31 @@ void insert_product_family(MYSQL *conn, const char *code, const char *name) {
     char query[256];
 
     snprintf(query, sizeof(query),
-             "INSERT INTO Product_Family (product_family_id, name) VALUES ('%s', '%s')",
+             "CALL insertProductFamily('%s', '%s');",
              code, name);
 
     if (mysql_query(conn, query)) {
-        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
+        fprintf(stderr, "Error al insertar familia de productos: %s\n", mysql_error(conn));
     }
 }
 
+
 void insert_product(MYSQL *conn, Product *product) {
     char query[500];
-    char family_id[50];
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    
-    // Llamar al procedimiento almacenado para obtener el ID de la familia
-    snprintf(query, sizeof(query), "CALL GetProductFamilyID('%s', @family_id);", product->product_family);
-    if (mysql_query(conn, query)) {
-        fprintf(stderr, "Error al obtener product_family_id: %s\n", mysql_error(conn));
-        return;
-    }
-    
-    // Obtener el valor de la variable de salida
-    if (mysql_query(conn, "SELECT @family_id")) {
-        fprintf(stderr, "Error al recuperar product_family_id: %s\n", mysql_error(conn));
-        return;
-    }
-    
-    res = mysql_store_result(conn);
-    if (res) {
-        row = mysql_fetch_row(res);
-        if (row) {
-            strncpy(family_id, row[0], sizeof(family_id) - 1);
-            family_id[sizeof(family_id) - 1] = '\0';
-        }
-        mysql_free_result(res);
-    }
-    
-    // Insertar el producto con el ID de la familia obtenido
-    snprintf(query, sizeof(query), "INSERT INTO Product (product_id, name, cost, price, stock, product_family_id) "
-                                   "VALUES ('%s', '%s', %.2f, %.2f, %d, '%s')",
-             product->code,                // product_id
-             product->name,                // name
-             product->cost,                // cost (float)
-             product->price,               // price (float)
-             product->stock,               // stock (int)
-             family_id);                    // product_family_id obtenido
+
+    // Llamar directamente al procedimiento almacenado insertNewProduct
+
+    snprintf(query, sizeof(query), 
+             "CALL insertNewProduct('%s', '%s', '%s', %.2f, %.2f, %d);",
+             product->code,    // product_id
+             product->name,    // name
+             product->family, // product_family_name
+             product->cost,    // cost
+             product->price,   // price
+             product->stock);  // stock
 
     if (mysql_query(conn, query)) {
-        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
+        fprintf(stderr, "Error al insertar producto: %s\n", mysql_error(conn));
     }
 }
 

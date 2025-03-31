@@ -125,7 +125,6 @@ void add_product_to_quotation() {
         return;
     }
 
-
     bool correct_quantity = false;
 
     while (!correct_quantity) {

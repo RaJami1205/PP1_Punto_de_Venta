@@ -27,6 +27,31 @@ BEGIN
     END IF;
 END $$
 
+CREATE PROCEDURE insertNewProduct
+(
+    IN p_product_id VARCHAR(50),
+    IN p_name VARCHAR(100),
+    IN p_family VARCHAR(100),
+    IN p_cost FLOAT,
+    IN p_price FLOAT,
+    IN p_stock INT
+)
+BEGIN
+    DECLARE p_product_family_id VARCHAR(50);
+
+    -- Verificar si la familia de productos existe
+    SELECT product_family_id INTO p_product_family_id 
+    FROM Product_Family 
+    WHERE name = p_family 
+    LIMIT 1;
+
+    -- Insertar el producto con la familia encontrada o creada
+    INSERT INTO Product 
+        (product_id, name, cost, price, stock, product_family_id)
+    VALUES
+        (p_product_id, p_name, p_cost, p_price, p_stock, p_product_family_id);
+END $$
+
 CREATE PROCEDURE GetProductFamilyID(
     IN p_name VARCHAR(100),
     OUT p_id VARCHAR(50)
