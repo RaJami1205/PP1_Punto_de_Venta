@@ -8,6 +8,8 @@ DROP PROCEDURE IF EXISTS deleteProductById $$
 DROP PROCEDURE IF EXISTS insertNewProduct $$
 DROP PROCEDURE IF EXISTS insertProductFamily $$
 DROP PROCEDURE IF EXISTS GetProductFamilyID $$
+DROP PROCEDURE IF EXISTS GetProductStock $$
+DROP PROCEDURE IF EXISTS UpdateProductStock $$
 DROP PROCEDURE IF EXISTS searchProduct $$
 DROP PROCEDURE IF EXISTS getLastQuotId $$
 DROP PROCEDURE IF EXISTS filterProductsByFamily $$
