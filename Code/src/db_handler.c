@@ -1,14 +1,10 @@
-#include <mysql/mysql.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <openssl/sha.h>
-#include "./include/models.h"
 #include "./include/db_handler.h"
 
-#define HASH_SIZE SHA256_DIGEST_LENGTH
-
+/*
+==========================================================================
+                              CONECTOR BD
+==========================================================================
+*/
 MYSQL *connect_to_db() {
     MYSQL *conn = mysql_init(NULL);
     if (conn == NULL) {
@@ -44,6 +40,16 @@ MYSQL *connect_to_db() {
 
     return conn;
 }
+
+void close_db_connection(MYSQL *conn) {
+    mysql_close(conn);
+}
+
+/*
+==========================================================================
+                                PRODUCTOS
+==========================================================================
+*/
 
 void insert_product_family(MYSQL *conn, const char *code, const char *name) {
     char query[256];
@@ -143,6 +149,12 @@ MYSQL_RES *get_last_quot_id(MYSQL *conn) {
     return mysql_store_result(conn);
 }
 
+/*
+==========================================================================
+                            COTIZACIONES
+==========================================================================
+*/
+
 void create_quotation(MYSQL *conn, Quotation *quotation) {
     char query[256];
     snprintf(query, sizeof(query), "CALL createQuotation(%.2f, %.2f)", 
@@ -155,17 +167,123 @@ void create_quotation(MYSQL *conn, Quotation *quotation) {
 
 void add_line_to_quotation(MYSQL *conn, Quotation_Line *quotation_line) {
     char query[512];
-    snprintf(query, sizeof(query), "CALL addLineToQuotation(%d, '%s', %d, %.2f, %.2f)",
-             quotation_line->quotation_id, quotation_line->product_name,
-             quotation_line->quantity, quotation_line->line_sub_total,
-             quotation_line->line_total_taxes);
+    snprintf(query, sizeof(query), "CALL addLineToQuotation(%d, %d, '%s', %d, %.2f, %.2f)",
+             quotation_line->line_id, quotation_line->quotation_id, 
+             quotation_line->product_name, quotation_line->quantity, 
+             quotation_line->line_sub_total, quotation_line->line_total_taxes);
 
     if (mysql_query(conn, query)) {
         fprintf(stderr, "Error al ejecutar addLineToQuotation: %s\n", mysql_error(conn));
     }
 }
 
+void update_quotation(MYSQL *conn, Quotation *quotation) {
+    if (!conn || !quotation) {
+        fprintf(stderr, "Error: Conexión o cotización no válida.\n");
+        return;
+    }
 
+    char query[512];
+    snprintf(query, sizeof(query), "CALL updateQuotation(%d, %.2f, %.2f)", 
+             quotation->id, 
+             quotation->sub_total, 
+             quotation->total_taxes);
+
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error al ejecutar updateQuotation: %s\n", mysql_error(conn));
+    }
+}
+
+
+void update_quotation_lines(MYSQL *conn, Quotation_Line *quotation_line) {
+    if (!conn || !quotation_line) {
+        fprintf(stderr, "Error: Conexión o línea de cotización no válida.\n");
+        return;
+    }
+
+    char query[512];
+    snprintf(query, sizeof(query), "CALL updateQuotationLine(%d, %d, '%s', %d, %.2f, %.2f)",
+            quotation_line->line_id, 
+            quotation_line->quotation_id,
+            quotation_line->product_name,
+            quotation_line->quantity,
+            quotation_line->line_sub_total,
+            quotation_line->line_total_taxes);
+
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error al ejecutar updateQuotationLine: %s\n", mysql_error(conn));
+    }
+}
+
+void delete_modified_quotation_lines(MYSQL *conn, Quotation *quotation) {
+    if (!conn) {
+        fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
+        return;
+    }
+
+    char query[256];
+    snprintf(query, sizeof(query), "CALL deleteQuotationLinesFromId(%d, %d)", quotation->id, quotation->num_lines + 1);
+
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error al ejecutar deleteQuotationLinesFromId: %s\n", mysql_error(conn));
+    }
+}
+
+MYSQL_RES *get_quotations(MYSQL *conn, bool show_all) {
+    if (!conn) {
+        fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
+        return NULL;
+    }
+
+    char query[256];
+    snprintf(query, sizeof(query), "CALL getQuotations(%d)", show_all);
+
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error al ejecutar getQuotations: %s\n", mysql_error(conn));
+        return NULL;
+    }
+
+    return mysql_store_result(conn);
+}
+
+MYSQL_RES *get_quotation_by_id(MYSQL *conn, int quotation_id) {
+    if (!conn) {
+        fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
+        return NULL;
+    }
+
+    char query[256];
+    snprintf(query, sizeof(query), "CALL searchQuotation(%d)", quotation_id);
+
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error al ejecutar searchQuotation: %s\n", mysql_error(conn));
+        return NULL;
+    }
+    
+    return mysql_store_result(conn);
+}
+
+MYSQL_RES *get_quotation_lines(MYSQL *conn, int quotation_id) {
+    if (!conn) {
+        fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
+        return NULL;
+    }
+
+    char query[256];
+    snprintf(query, sizeof(query), "CALL searchQuotationLines(%d)", quotation_id);
+
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error al ejecutar searchQuotationLines: %s\n", mysql_error(conn));
+        return NULL;
+    }    
+    return mysql_store_result(conn);
+}
+
+/*
+==========================================================================
+                                LOGIN
+==========================================================================
+*/
 void hash_to_hex(const unsigned char *hash, char *hex_str, size_t length)
 {
     for (size_t i = 0; i < length; i++) {
@@ -227,8 +345,4 @@ bool validate_credentials(MYSQL *conn, const char *username, unsigned char *pass
 
     mysql_stmt_close(stmt);
     return false;
-}
-
-void close_db_connection(MYSQL *conn) {
-    mysql_close(conn);
 }

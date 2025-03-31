@@ -1,2 +1,2 @@
 Fam1,Enlatados 
-Fam2,Granos básicos
+Fam2,Granos basicos

@@ -23,12 +23,11 @@ void print_products() {
     MYSQL_ROW row;
     printf("Productos Disponibles:\n");
 
-    printf("┌─────┬─────────────────────────┬─────────────────────────┬──────────┬──────────┐\n");
-    printf("│  #  │ Producto                │ Descripción             │ Stock    │ Precio   │\n");
-    printf("├─────┼─────────────────────────┼─────────────────────────┼──────────┼──────────┤\n");
+    printf("┌────────────┬─────────────────────────┬─────────────────────────┬──────────┬──────────┐\n");
+    printf("│ ID         │ Producto                │ Descripción             │ Stock    │ Precio   │\n");
+    printf("├────────────┼─────────────────────────┼─────────────────────────┼──────────┼──────────┤\n");
     
-
-    int width_id = 3, width_product = 23, width_desc = 23, width_stock = 8, width_price = 8;
+    int width_id = 10, width_product = 23, width_desc = 23, width_stock = 8, width_price = 8;
 
     while ((row = mysql_fetch_row(res)) != NULL) {
         
@@ -41,7 +40,7 @@ void print_products() {
         );
     }
 
-    printf("└─────┴─────────────────────────┴─────────────────────────┴──────────┴──────────┘\n");
+    printf("└────────────┴─────────────────────────┴─────────────────────────┴──────────┴──────────┘\n");
 
     
     mysql_free_result(res);
@@ -68,13 +67,13 @@ void print_filtered_products() {
 
     printf("\nPRODUCTOS EN LA FAMILIA '%s':\n", family_input);
 
-    printf("┌─────┬─────────────────────────┬─────────────────────────┬──────────┬──────────┐\n");
-    printf("│  #  │ Producto                │ Descripción             │ Stock    │ Precio   │\n");
-    printf("├─────┼─────────────────────────┼─────────────────────────┼──────────┼──────────┤\n");
+    printf("┌────────────┬─────────────────────────┬─────────────────────────┬──────────┬──────────┐\n");
+    printf("│ ID         │ Producto                │ Descripción             │ Stock    │ Precio   │\n");
+    printf("├────────────┼─────────────────────────┼─────────────────────────┼──────────┼──────────┤\n");
     
     MYSQL_ROW row;
 
-    int width_id = 3, width_product = 23, width_desc = 23, width_stock = 8, width_price = 8;
+    int width_id = 10, width_product = 23, width_desc = 23, width_stock = 8, width_price = 8;
 
     while ((row = mysql_fetch_row(result)) != NULL) {
         
@@ -87,7 +86,7 @@ void print_filtered_products() {
         );
     }
 
-    printf("└─────┴─────────────────────────┴─────────────────────────┴──────────┴──────────┘\n");
+    printf("└────────────┴─────────────────────────┴─────────────────────────┴──────────┴──────────┘\n");
 
     mysql_free_result(result);
     close_db_connection(conn);

@@ -1,7 +1,11 @@
 #include "./include/menus.h"
 
 
-// MAIN MENU
+/*
+==========================================================================
+                              MAIN MENU
+==========================================================================
+*/
 void print_main_menu() {
     int opcion;
     
@@ -70,8 +74,11 @@ bool login() {
     return auth_success;
 }
 
-// ADMIN MENU
-
+/*
+==========================================================================
+                             ADMIN MENU
+==========================================================================
+*/
 void print_admin_submenu() {
     int subopcion_A;
 
@@ -132,8 +139,11 @@ void print_admin_submenu() {
     }
 }
 
-// GENERAL MENU
-
+/*
+==========================================================================
+                            GENERAL MENU
+==========================================================================
+*/
 void print_general_submenu() {
     int subopcion_G;
 
@@ -144,9 +154,10 @@ void print_general_submenu() {
     printf("║             OPCIONES               ║\n");
     printf("║                                    ║\n");
     printf("║   [1] 📖 Consulta de Catálogo      ║\n");
-    printf("║   [2] 💰 Cotizar                   ║\n");
-    printf("║   [3] 🧾 Facturar                  ║\n");
-    printf("║   [4] 🔙 Volver                    ║\n");
+    printf("║   [2] 💰 Crear Cotización          ║\n");
+    printf("║   [3] 💰 Modificar Cotización      ║\n");
+    printf("║   [4] 🧾 Facturar                  ║\n");
+    printf("║   [5] 🔙 Volver                    ║\n");
     printf("╚════════════════════════════════════╝\n");
 
     printf("\nIngrese la opcion: ");
@@ -162,10 +173,14 @@ void print_general_submenu() {
             break;
 
         case 3:
-            printf("Has seleccionado Facturar.\n");
+            modify_quotation();
             break;
 
         case 4:
+            printf("Has seleccionado Facturar.\n");
+            break;
+
+        case 5:
             print_main_menu();
             break;
 

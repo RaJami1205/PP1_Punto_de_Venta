@@ -47,4 +47,11 @@ void print_quotation_menu();
 // Función para manejar la creación de nueva cotización
 void new_quotation();
 
+void search_quotation(int quotation_id);
+
+void search_quotation_lines(int quotation_id);
+
+// Función para editar cotización existente
+void modify_quotation();
+
 #endif /* QUOTATIONS_H */

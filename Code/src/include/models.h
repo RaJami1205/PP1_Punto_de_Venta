@@ -70,7 +70,7 @@ typedef struct {
     int id;
     float sub_total;
     float total_taxes;
-    char total[10];
+    float total;
     char state[100];
     int num_lines;
     Quotation_Line *lines;

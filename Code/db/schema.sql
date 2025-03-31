@@ -48,13 +48,13 @@ CREATE TABLE Quotation (
 );
 
 CREATE TABLE Quotation_Lines (
-    quotation_line_id   INT NOT NULL AUTO_INCREMENT,
+    quotation_line_id   INT NOT NULL,
     quotation_id        INT NOT NULL,
     product_id          VARCHAR(50) NOT NULL,
     quantity            INT NOT NULL,
     line_sub_total      DECIMAL(15,2) NOT NULL CHECK (line_sub_total >= 0),
     line_total_taxes    DECIMAL(15,2) NOT NULL CHECK (line_total_taxes >= 0),
-    PRIMARY KEY (quotation_line_id),
+    PRIMARY KEY (quotation_line_id, quotation_id),
     FOREIGN KEY (quotation_id)  REFERENCES Quotation(quotation_id)
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (product_id)    REFERENCES Product(product_id)
@@ -73,14 +73,22 @@ CREATE TABLE Invoice (
 );
 
 CREATE TABLE Invoice_Lines (
-    invoice_line_id   INT NOT NULL AUTO_INCREMENT,
+    invoice_line_id   INT NOT NULL,
     invoice_id        INT NOT NULL,
     product_id        VARCHAR(50) NOT NULL,
     quantity          INT NOT NULL,
     line_sub_total    DECIMAL(15,2) NOT NULL CHECK (line_sub_total >= 0),
     line_total_taxes  DECIMAL(15,2) NOT NULL CHECK (line_total_taxes >= 0),
-    PRIMARY KEY (invoice_line_id),
+    PRIMARY KEY (invoice_line_id, invoice_id),
     FOREIGN KEY (invoice_id) REFERENCES Invoice(invoice_id)
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (product_id) REFERENCES Product(product_id)
 );
+
+INSERT INTO Users (username, password)
+VALUES ('admin', SHA2('1234', 256));
+
+INSERT INTO Sales_Point 
+    (name, legal_entity_id, phone_number)
+VALUES
+    ('Mini Super El Exito', '11023456785', '+506 8764 3456');
