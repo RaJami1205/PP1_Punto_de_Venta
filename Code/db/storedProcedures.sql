@@ -44,6 +44,31 @@ BEGIN
 END $$
 
 DELIMITER $$
+
+CREATE PROCEDURE GetProductStock(IN p_product_id VARCHAR(50), OUT p_stock INT)
+BEGIN
+    SELECT stock INTO p_stock
+    FROM Product
+    WHERE product_id = p_product_id;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE UpdateProductStock(
+    IN p_product_id VARCHAR(50),
+    IN p_new_stock INT
+)
+BEGIN
+    UPDATE Product
+    SET stock = p_new_stock
+    WHERE product_id = p_product_id;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
 CREATE PROCEDURE searchProduct(IN p_search_value VARCHAR(50))
 BEGIN
     DECLARE v_count INT;
