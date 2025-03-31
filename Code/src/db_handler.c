@@ -181,6 +181,96 @@ void drop_product(MYSQL *conn, const char *code) {
     }
 }
 
+void update_stock_product(MYSQL *conn, Product *product, int *count) {
+    for (int i = 0; i < *count; i++) {
+        char query[500];
+        MYSQL_RES *res;
+        MYSQL_ROW row;
+        int current_stock;  // Variable para almacenar el stock actual de la base de datos
+        int new_stock;      // Nuevo stock que vamos a actualizar
+
+        // Llamar al procedimiento almacenado para obtener el stock del producto
+        snprintf(query, sizeof(query), "CALL GetProductStock('%s', @current_stock);", product[i].code);
+        if (mysql_query(conn, query)) {
+            fprintf(stderr, "Error al obtener el stock del producto %s: %s\n", product[i].code, mysql_error(conn));
+            return;
+        }
+        
+        // Obtener el valor de la variable de salida @current_stock
+        if (mysql_query(conn, "SELECT @current_stock")) {
+            fprintf(stderr, "Error al recuperar current_stock: %s\n", mysql_error(conn));
+            return;
+        }
+        
+        res = mysql_store_result(conn);
+        if (res) {
+            row = mysql_fetch_row(res);
+            if (row) {
+                current_stock = atoi(row[0]);  // Convertir el valor a un entero
+            }
+            mysql_free_result(res);
+        }
+
+        // Sumar el stock actual con el stock del producto
+        new_stock = current_stock + product[i].stock;
+
+        // Ahora, pasamos el nuevo stock al procedimiento almacenado para actualizarlo
+        snprintf(query, sizeof(query), "CALL UpdateProductStock('%s', %d);", product[i].code, new_stock);
+        
+        if (mysql_query(conn, query)) {
+            fprintf(stderr, "Error al actualizar el stock del producto %s: %s\n", product[i].code, mysql_error(conn));
+            return;
+        } else {
+            printf("Stock actualizado para el producto %s: %d\n", product[i].code, new_stock);
+        }
+    }
+}
+
+void update_stock_product(MYSQL *conn, Product *product, int *count) {
+    for (int i = 0; i < *count; i++) {
+        char query[500];
+        MYSQL_RES *res;
+        MYSQL_ROW row;
+        int current_stock;  // Variable para almacenar el stock actual de la base de datos
+        int new_stock;      // Nuevo stock que vamos a actualizar
+
+        // Llamar al procedimiento almacenado para obtener el stock del producto
+        snprintf(query, sizeof(query), "CALL GetProductStock('%s', @current_stock);", product[i].code);
+        if (mysql_query(conn, query)) {
+            fprintf(stderr, "Error al obtener el stock del producto %s: %s\n", product[i].code, mysql_error(conn));
+            return;
+        }
+        
+        // Obtener el valor de la variable de salida @current_stock
+        if (mysql_query(conn, "SELECT @current_stock")) {
+            fprintf(stderr, "Error al recuperar current_stock: %s\n", mysql_error(conn));
+            return;
+        }
+        
+        res = mysql_store_result(conn);
+        if (res) {
+            row = mysql_fetch_row(res);
+            if (row) {
+                current_stock = atoi(row[0]);  // Convertir el valor a un entero
+            }
+            mysql_free_result(res);
+        }
+
+        // Sumar el stock actual con el stock del producto
+        new_stock = current_stock + product[i].stock;
+
+        // Ahora, pasamos el nuevo stock al procedimiento almacenado para actualizarlo
+        snprintf(query, sizeof(query), "CALL UpdateProductStock('%s', %d);", product[i].code, new_stock);
+        
+        if (mysql_query(conn, query)) {
+            fprintf(stderr, "Error al actualizar el stock del producto %s: %s\n", product[i].code, mysql_error(conn));
+            return;
+        } else {
+            printf("Stock actualizado para el producto %s: %d\n", product[i].code, new_stock);
+        }
+    }
+}
+
 /*
 ==========================================================================
                             COTIZACIONES

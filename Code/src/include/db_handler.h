@@ -54,7 +54,8 @@ MYSQL_RES *get_products_by_family(MYSQL *conn, const char *family);
 //Función para eliminar un producto
 void drop_product(MYSQL *conn, const char *code);
 
-
+// Función para aumentar la cantidad en stock de los productos
+void update_stock_product(MYSQL *conn, Product *product, int *count);
 
 /*
 ==========================================================================

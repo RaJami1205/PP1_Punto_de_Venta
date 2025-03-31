@@ -26,4 +26,7 @@ void set_product();
 // Función para eliminar un producto mediante su ID
 void delete_product();
 
+// Función para aumentar cantidad en stock de los productos
+void loadProductStock();
+
 #endif /* PRODUCTS_H */

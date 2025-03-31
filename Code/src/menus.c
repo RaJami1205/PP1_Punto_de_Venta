@@ -115,11 +115,10 @@ void print_admin_submenu() {
         case 3:
             delete_product();
             print_admin_submenu();
-            break;
 
         case 4:
-            printf("Has seleccionado Consulta de facturas.\n");
-            break;
+            loadProductStock();
+            print_admin_submenu();
 
         case 5:
             printf("Has seleccionado Estadísticas.\n");

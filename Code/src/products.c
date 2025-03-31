@@ -87,9 +87,11 @@ void print_filtered_products() {
 
 void set_product_family() {
     Product_Family product_family[MAX_LINES];
+    char buffer[MAX_LENGTH]; // Buffer para leer cada línea
+    int count = 0;
 
     char filename[100];
-    printf("Ingrese el nombre del archivo: ");
+    printf("Ingrese la ruta del archivo: ");
     scanf("%99s", filename);
 
     FILE *file = fopen(filename, "r");
@@ -97,9 +99,6 @@ void set_product_family() {
         perror("Error al abrir el archivo");
         return;
     }
-
-    char buffer[MAX_LENGTH]; // Buffer para leer cada línea
-    int count = 0;
 
     while (fgets(buffer, sizeof(buffer), file) && count < MAX_LINES) {
         buffer[strcspn(buffer, "\n")] = 0; // Eliminar salto de línea
@@ -142,20 +141,19 @@ void set_product_family() {
 }
 
 void set_product() {
-    Product products[MAX_LINES]; 
+    Product products[MAX_LINES];
+    char buffer[MAX_LENGTH]; // Buffer para leer cada línea
+    int count = 0;
 
     char filename[100];
-    printf("Ingrese el nombre del archivo: ");
+    printf("Ingrese la ruta del archivo: ");
     scanf("%99s", filename);
-    
+
     FILE *file = fopen(filename, "r"); 
     if (file == NULL) {
         perror("Error al abrir el archivo");
         return;
     }
-
-    char buffer[MAX_LENGTH];
-    int count = 0;
     
     // Leer los productos del archivo
     while (fgets(buffer, sizeof(buffer), file) && count < MAX_LINES) {
@@ -218,5 +216,45 @@ void delete_product() {
     drop_product(conn, product_id);
 
     // Cerrar la conexión
+    mysql_close(conn);
+}
+
+void loadProductStock(){
+    Product products[MAX_LINES];
+    char buffer[MAX_LENGTH]; // Buffer para leer cada línea
+    int count = 0;
+
+    char filename[100];
+    printf("Ingrese la ruta del archivo: ");
+    scanf("%99s", filename);
+    
+    // Eliminar el salto de línea que fgets agrega
+    filename[strcspn(filename, "\n")] = 0;
+    
+    printf("Ruta ingresada: %s\n", filename); // Depuración
+
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        perror("Error al abrir el archivo");
+        return;
+    }
+
+    while (fgets(buffer, MAX_LENGTH, file) && count < MAX_LINES) {
+        char code[50];
+        int stock;
+        
+        if (sscanf(buffer, "%49[^,],%d", code, &stock) >= 1) {
+            strcpy(products[count].code, code);
+            products[count].stock = stock;
+            count++;
+        }
+    }
+
+    fclose(file);
+
+    MYSQL *conn = connect_to_db();
+
+    update_stock_product(conn, products, &count);  
+
     mysql_close(conn);
 }
