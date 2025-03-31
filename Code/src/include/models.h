@@ -70,9 +70,9 @@ typedef struct {
     char customer_name[100]; 
     char date[11];
     int quotation_reference_id;
-    double sub_total;
-    double total_taxes;
-    double total;
+    float sub_total;
+    float total_taxes;
+    float total;
     int num_lines;
     Invoice_Line *lines;
 } Invoice;

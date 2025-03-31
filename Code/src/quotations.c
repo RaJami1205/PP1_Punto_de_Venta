@@ -166,8 +166,8 @@ void add_product_to_quotation() {
         existing_line->line_sub_total = existing_line->price * existing_line->quantity;
         existing_line->line_total_taxes = existing_line->line_sub_total * 0.13;
 
-        current_quotation.sub_total += current_quotation.lines->line_sub_total;
-        current_quotation.total_taxes += current_quotation.lines->line_total_taxes;
+        current_quotation.sub_total += existing_line->line_sub_total;
+        current_quotation.total_taxes += existing_line->line_total_taxes;
         current_quotation.total = current_quotation.sub_total + current_quotation.total_taxes;
 
         printf("\nCantidad actualizada en la cotización.\n");
@@ -186,11 +186,11 @@ void add_product_to_quotation() {
         strcpy(new_line->product_name, selected_product.name);
         new_line->quantity = quantity;
         new_line->price = selected_product.price;
-        new_line->line_sub_total = selected_product.price * quantity;
+        new_line->line_sub_total = selected_product.price * new_line->quantity;
         new_line->line_total_taxes = new_line->line_sub_total * 0.13;
 
-        current_quotation.sub_total += current_quotation.lines->line_sub_total;
-        current_quotation.total_taxes += current_quotation.lines->line_total_taxes;
+        current_quotation.sub_total += new_line->line_sub_total;
+        current_quotation.total_taxes += new_line->line_total_taxes;
         current_quotation.total = current_quotation.sub_total + current_quotation.total_taxes;
         current_quotation.num_lines++;
 
@@ -210,8 +210,7 @@ void add_product_to_quotation() {
     }
 }
 
-void rm_product_from_quotation() {
-    int line_to_remove;
+void rm_product_from_quotation(int line_to_remove) {
 
     if (current_quotation.num_lines == 0) {
         printf("\nNo hay productos en la cotización para eliminar.\n");
@@ -219,19 +218,22 @@ void rm_product_from_quotation() {
         return;
     }
 
-    print_quotation();
+    if (line_to_remove == 0) {
+        print_quotation();
 
-    printf("\nLas siguientes líneas están en la cotización:\n");
-    for (int i = 0; i < current_quotation.num_lines; i++) {
-        printf("%d: %s (Cantidad: %d)\n", current_quotation.lines[i].line_id, current_quotation.lines[i].product_name, current_quotation.lines[i].quantity);
+        printf("\nLas siguientes líneas están en la cotización:\n");
+        for (int i = 0; i < current_quotation.num_lines; i++) {
+            printf("%d: %s (Cantidad: %d)\n", current_quotation.lines[i].line_id, current_quotation.lines[i].product_name, current_quotation.lines[i].quantity);
+        }
+    
+        printf("\nIngrese el número de la línea a eliminar (0 para cancelar): ");
+        if (scanf("%d", &line_to_remove) != 1 || line_to_remove <= 0 || line_to_remove > current_quotation.num_lines) {
+            printf("\nNúmero de línea inválido.\n");
+            print_quotation_menu();
+            return;
+        }
     }
-
-    printf("\nIngrese el número de la línea a eliminar (0 para cancelar): ");
-    if (scanf("%d", &line_to_remove) != 1 || line_to_remove <= 0 || line_to_remove > current_quotation.num_lines) {
-        printf("\nNúmero de línea inválido.\n");
-        print_quotation_menu();
-        return;
-    }
+    
 
     int index_to_remove = line_to_remove - 1;
     Quotation_Line *line = &current_quotation.lines[index_to_remove];
@@ -264,6 +266,11 @@ void rm_product_from_quotation() {
     printf("\nLínea eliminada correctamente.\n");
 
     print_quotation_menu();
+}
+
+void seek_quotation() {
+    set_current_quot(); 
+    print_quotation();
 }
 
 void ask_save_quotation() {
@@ -359,7 +366,7 @@ void print_all_quotations(bool show_all_quots) {
     printf("├───────────────┼───────────────┤\n");
 
     while ((row = mysql_fetch_row(result))) {
-        printf("│ %-13s │ %-13s │\n", row[0], row[1]);
+        printf("│ %-13s │ %-13s │\n", row[0], row[3]);
     }
 
     printf("└───────────────┴───────────────┘\n");
@@ -367,7 +374,6 @@ void print_all_quotations(bool show_all_quots) {
     mysql_free_result(result);
     close_db_connection(conn);
 }
-
 
 void print_quotation() {
     printf("\n                                      COTIZACIÓN N°%d\n", current_quotation.id);
@@ -413,7 +419,7 @@ void print_quotation_menu() {
         quote_product(false);
         break;
     case 2:
-        rm_product_from_quotation();
+        rm_product_from_quotation(0);
         break;
     case 3:
         save_quotation();
@@ -521,12 +527,11 @@ void set_current_quot() {
     
     if (scanf("%d", &quotation_id) != 1 || quotation_id <= 0) {
         printf("\nID inválido. Intente de nuevo.\n");
-        return;
+        set_current_quot();
     }
 
     search_quotation(quotation_id);
     search_quotation_lines(quotation_id);
-    printf("\nCotización cargada correctamente.\n");
 }
 
 void modify_quotation() {

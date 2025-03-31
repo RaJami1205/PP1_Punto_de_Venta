@@ -133,6 +133,7 @@ void set_product_family() {
 
     // Insertar en la base de datos
     for (int i = 0; i < count; i++) {
+        // TO-DO IMPRIMIR LINEAS QUE NO SE AGREGUEN
         insert_product_family(conn, product_family[i].code, product_family[i].name);
     }
 
@@ -183,6 +184,7 @@ void set_product() {
 
     // Insertar los productos en la base de datos
     for (int i = 0; i < count; i++) {
+        // TO-DO IMPRIMIR LINEAS QUE NO SE AGREGUEN
         insert_product(conn, &products[i]);
     }
 

@@ -34,7 +34,10 @@ Quotation_Line *find_product_line(const char *product_name);
 void add_product_to_quotation();
 
 // Función para remover una línea de la cotización
-void rm_product_from_quotation();
+void rm_product_from_quotation(int line_to_remove);
+
+// Función para imprimir detalles de cotización
+void seek_quotation();
 
 // Función para consultar si desea salir sin guardar
 void ask_save_quotation();

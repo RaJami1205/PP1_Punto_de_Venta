@@ -378,6 +378,29 @@ MYSQL_RES *get_last_invoice_id(MYSQL *conn) {
     return mysql_store_result(conn);
 }
 
+void create_invoice(MYSQL *conn, Invoice *invoice) {
+    char query[256];
+    snprintf(query, sizeof(query), "CALL createInvoice(%d, '%s', '%s', %.2f, %.2f)", 
+                invoice->quotation_reference_id, invoice->date, invoice->customer_name,      
+                invoice->sub_total, invoice->total_taxes);
+
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error al ejecutar createInvoice: %s\n", mysql_error(conn));
+    }
+}
+
+void add_line_to_invoice(MYSQL *conn, Invoice_Line *invoice_line) {
+    char query[512];
+    snprintf(query, sizeof(query), "CALL addLineToInvoice(%d, %d, '%s', %d, %.2f, %.2f)",
+        invoice_line->line_id, invoice_line->invoice_id, 
+        invoice_line->product_name, invoice_line->quantity, 
+        invoice_line->line_sub_total, invoice_line->line_total_taxes);
+
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error al ejecutar addLineToQuotation: %s\n", mysql_error(conn));
+    }
+}
+
 /*
 ==========================================================================
                                 LOGIN

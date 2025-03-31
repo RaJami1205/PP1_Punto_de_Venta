@@ -2,6 +2,28 @@ USE Sales_Points;
 
 DELIMITER $$
 
+DROP PROCEDURE IF EXISTS getSalesPoint $$
+DROP PROCEDURE IF EXISTS GetAllProducts $$
+DROP PROCEDURE IF EXISTS deleteProductById $$
+DROP PROCEDURE IF EXISTS insertNewProduct $$
+DROP PROCEDURE IF EXISTS insertProductFamily $$
+DROP PROCEDURE IF EXISTS GetProductFamilyID $$
+DROP PROCEDURE IF EXISTS searchProduct $$
+DROP PROCEDURE IF EXISTS getLastQuotId $$
+DROP PROCEDURE IF EXISTS filterProductsByFamily $$
+DROP PROCEDURE IF EXISTS createQuotation $$
+DROP PROCEDURE IF EXISTS addLineToQuotation $$
+DROP PROCEDURE IF EXISTS getQuotations $$
+DROP PROCEDURE IF EXISTS searchQuotation $$
+DROP PROCEDURE IF EXISTS searchQuotationLines $$
+DROP PROCEDURE IF EXISTS updateQuotation $$
+DROP PROCEDURE IF EXISTS updateQuotationLine $$
+DROP PROCEDURE IF EXISTS deleteQuotationLinesFromId $$
+DROP PROCEDURE IF EXISTS getLastInvoiceId $$
+DROP PROCEDURE IF EXISTS createInvoice $$
+DROP PROCEDURE IF EXISTS addLineToInvoice $$
+
+
 -- Procedimiento para obtener la información del punto de venta
 CREATE PROCEDURE getSalesPoint()
 BEGIN
@@ -219,7 +241,7 @@ CREATE PROCEDURE searchQuotationLines
     IN p_quota_id INT
 )
 BEGIN
-    SELECT ql.quotation_line_id, ql.quotation_id, p.name, ql.quantity, ql.line_sub_total, ql.line_total_taxes
+    SELECT ql.quotation_line_id, ql.quotation_id, p.name, ql.quantity, p.price, ql.line_sub_total, ql.line_total_taxes
     FROM Quotation_Lines ql
     LEFT JOIN Product p ON p.product_id = ql.product_id
     WHERE p_quota_id = quotation_id;
@@ -238,7 +260,7 @@ BEGIN
     WHERE quotation_id = p_quot_id;
 END $$
 
--- Procedimiento para actualizar una línea de cotización
+-- Procedimiento para actualizar o insertar una línea de cotización
 CREATE PROCEDURE updateQuotationLine
 (
     IN p_quot_line_id INT,
@@ -251,8 +273,10 @@ CREATE PROCEDURE updateQuotationLine
 BEGIN
     DECLARE p_product_id VARCHAR(50);
     
+    -- Obtener el ID del producto
     SELECT product_id INTO p_product_id FROM Product WHERE name = p_product_name LIMIT 1;
     
+    -- Intentar actualizar la línea existente
     UPDATE Quotation_Lines
     SET 
         product_id = p_product_id, 
@@ -260,7 +284,14 @@ BEGIN
         line_sub_total = p_line_sub_total, 
         line_total_taxes = p_line_total_taxes
     WHERE quotation_line_id = p_quot_line_id AND quotation_id = p_quot_id;
+    
+    -- Si no se actualizó ninguna fila, insertar una nueva línea
+    IF ROW_COUNT() = 0 THEN
+        INSERT INTO Quotation_Lines (quotation_line_id, quotation_id, product_id, quantity, line_sub_total, line_total_taxes)
+        VALUES (p_quot_line_id, p_quot_id, p_product_id, p_qty, p_line_sub_total, p_line_total_taxes);
+    END IF;
 END $$
+
 
 -- Procedimiento para eliminar líneas de cotización a partir de un ID específico
 CREATE PROCEDURE deleteQuotationLinesFromId
@@ -273,11 +304,55 @@ BEGIN
     WHERE quotation_id = p_quot_id AND quotation_line_id > p_id_from;
 END $$
 
--- Procedimiento para obtener el último ID de cotización
+-- Procedimiento para obtener el último ID de factura
 CREATE PROCEDURE getLastInvoiceId()
 BEGIN
     SELECT MAX(invoice_id)
     FROM Invoice i;
+END $$
+
+-- Procedimiento para crear una factura
+CREATE PROCEDURE createInvoice
+(
+	IN p_quot_reference_id INT,
+    IN p_date DATE,
+    IN p_customer_name VARCHAR(100),
+    IN p_sub_total FLOAT,
+    IN p_total_taxes FLOAT
+)
+BEGIN
+    INSERT INTO Invoice
+        (quotation_reference_id, date, customer_name, sub_total, total_taxes)
+    VALUES
+        (p_quot_reference_id, p_date, p_customer_name, p_sub_total, p_total_taxes);
+        
+	UPDATE Quotation
+    SET state = 'Finalizada'
+    WHERE quotation_id = p_quot_reference_id;
+END $$
+
+-- Procedimiento para añadir una línea a la factura
+CREATE PROCEDURE addLineToInvoice
+(
+    IN p_invoice_line_id INT,
+    IN p_invoice_id INT,
+    IN p_product_name VARCHAR(100),
+    IN p_qty INT,
+    IN p_line_sub_total FLOAT,
+    IN p_line_total_taxes FLOAT
+)
+BEGIN
+    DECLARE p_product_id VARCHAR(50);
+    
+    SELECT product_id INTO p_product_id FROM Product WHERE name = p_product_name LIMIT 1;
+    
+    IF p_product_id IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: Producto no encontrado';
+    ELSE
+        INSERT INTO Invoice_Lines (invoice_line_id, invoice_id, product_id, quantity, line_sub_total, line_total_taxes)
+        VALUES (p_invoice_line_id, p_invoice_id, p_product_id, p_qty, p_line_sub_total, p_line_total_taxes);
+    END IF;
 END $$
 
 DELIMITER ;

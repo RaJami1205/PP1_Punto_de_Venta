@@ -94,8 +94,15 @@ MYSQL_RES *get_quotation_lines(MYSQL *conn, int quotation_id);
                               FACTURACIÓN
 ==========================================================================
 */
+
 // Función para obtener el último id de factura creada
 MYSQL_RES *get_last_invoice_id(MYSQL *conn);
+
+// Función para agregar la factura
+void create_invoice(MYSQL *conn, Invoice *invoice);
+
+// Función para agregar nueva linea a la factura
+void add_line_to_invoice(MYSQL *conn, Invoice_Line *invoice_line);
 
 /*
 ==========================================================================
