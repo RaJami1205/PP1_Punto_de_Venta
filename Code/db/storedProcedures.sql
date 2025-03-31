@@ -149,6 +149,28 @@ BEGIN
     END IF;
 END $$
 
+-- Procedimiento para obtener el stock actual del producto
+CREATE PROCEDURE GetProductStock(
+    IN p_product_id VARCHAR(50),
+    OUT p_current_stock INT
+)
+BEGIN
+    SELECT stock INTO p_current_stock
+    FROM Product
+    WHERE product_id = p_product_id;
+END $$
+
+-- Procedimiento para actualizar el stock del producto
+CREATE PROCEDURE UpdateProductStock(
+    IN p_product_id VARCHAR(50),
+    IN p_new_stock INT
+)
+BEGIN
+    UPDATE Product
+    SET stock = p_new_stock
+    WHERE product_id = p_product_id;
+END $$
+
 -- Procedimiento para obtener el último ID de cotización
 CREATE PROCEDURE getLastQuotId()
 BEGIN
