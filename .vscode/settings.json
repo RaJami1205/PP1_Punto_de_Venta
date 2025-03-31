@@ -13,7 +13,11 @@
         "general_menu.h": "c",
         "time.h": "c",
         "stdlib.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "invoices.h": "c",
+        "quotations.h": "c",
+        "typeinfo": "c",
+        "menus.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

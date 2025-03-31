@@ -1,5 +1,9 @@
 #include "./include/quotations.h"
 
+Quotation *get_current_quotation() {
+    return &current_quotation;
+}
+
 int get_last_quo_id() {
     MYSQL *conn = connect_to_db();
     if (!conn) {
@@ -7,7 +11,7 @@ int get_last_quo_id() {
         return -1;
     }
     
-    MYSQL_RES *result = get_last_quot_id(conn);
+    MYSQL_RES *result = get_last_quotation_id(conn);
     if (!result) {
         close_db_connection(conn);
         return -1;
@@ -262,8 +266,6 @@ void rm_product_from_quotation() {
     print_quotation_menu();
 }
 
-
-
 void ask_save_quotation() {
     if (current_quotation.num_lines == 0) {
         return;
@@ -336,14 +338,14 @@ void save_quotation() {
     print_general_submenu();
 }
 
-void print_all_quotations(bool show_all) {
+void print_all_quotations(bool show_all_quots) {
     MYSQL *conn = connect_to_db();
     if (!conn) {
         printf("\nError al conectar con la base de datos.\n");
         return;
     }
 
-    MYSQL_RES *result = get_quotations(conn, show_all);
+    MYSQL_RES *result = get_quotations(conn, show_all_quots);
     if (!result) {
         printf("\nError al obtener las cotizaciones.\n");
         close_db_connection(conn);
@@ -506,7 +508,6 @@ void search_quotation_lines(int quotation_id) {
             i++;
         }
         current_quotation.num_lines = num_lines;
-        printf("%d", current_quotation.num_lines);
 
     }
 
@@ -514,13 +515,8 @@ void search_quotation_lines(int quotation_id) {
     close_db_connection(conn);
 }
 
-void modify_quotation() {
-    edit_quotation = true;
-
-    print_all_quotations(false);
-
+void set_current_quot() {
     int quotation_id;
-    printf("\nModificar Cotización\n");
     printf("Seleccione una cotización mediante su ID\n= ");
     
     if (scanf("%d", &quotation_id) != 1 || quotation_id <= 0) {
@@ -530,7 +526,15 @@ void modify_quotation() {
 
     search_quotation(quotation_id);
     search_quotation_lines(quotation_id);
-
     printf("\nCotización cargada correctamente.\n");
+}
+
+void modify_quotation() {
+    edit_quotation = true;
+
+    print_all_quotations(false);
+    printf("\nModificar Cotización\n");
+
+    set_current_quot();
     print_quotation_menu();
 }

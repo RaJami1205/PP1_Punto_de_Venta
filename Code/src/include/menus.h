@@ -7,6 +7,7 @@
 #include "products.h"
 #include "quotations.h"
 #include "invoices.h"
+#include "models.h"
 #include "db_handler.h"
 
 #define HASH_SIZE SHA256_DIGEST_LENGTH

@@ -22,7 +22,14 @@ MYSQL *connect_to_db();
 // Función para cerrar la conexión a la base de datos
 void close_db_connection(MYSQL *conn);
 
+/*
+==========================================================================
+                                PUNTO DE VENTA
+==========================================================================
+*/
 
+// Función para obtener la información del punto de venta
+Sales_Point get_sales_point(MYSQL *conn);
 
 /*
 ==========================================================================
@@ -55,7 +62,7 @@ void drop_product(MYSQL *conn, const char *code);
 ==========================================================================
 */
 // Función para obtener el último id de cotización creado
-MYSQL_RES *get_last_quot_id(MYSQL *conn);
+MYSQL_RES *get_last_quotation_id(MYSQL *conn);
 
 // Función para agregar la cotización
 void create_quotation(MYSQL *conn, Quotation *quotation);
@@ -81,7 +88,13 @@ MYSQL_RES *get_quotation_by_id(MYSQL *conn, int quotation_id);
 // Función para obtener líneas de cotización
 MYSQL_RES *get_quotation_lines(MYSQL *conn, int quotation_id);
 
-
+/*
+==========================================================================
+                              FACTURACIÓN
+==========================================================================
+*/
+// Función para obtener el último id de factura creada
+MYSQL_RES *get_last_invoice_id(MYSQL *conn);
 
 /*
 ==========================================================================

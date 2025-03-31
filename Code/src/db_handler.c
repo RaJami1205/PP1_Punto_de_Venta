@@ -47,6 +47,43 @@ void close_db_connection(MYSQL *conn) {
 
 /*
 ==========================================================================
+                                PUNTO DE VENTA
+==========================================================================
+*/
+
+Sales_Point get_sales_point(MYSQL *conn) {
+    Sales_Point sales_point = {0, "", "", ""};
+    if (!conn) {
+        fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
+        return sales_point;
+    }
+
+    if (mysql_query(conn, "CALL getSalesPoint()")) {
+        fprintf(stderr, "Error al ejecutar getSalesPoint: %s\n", mysql_error(conn));
+        return sales_point;
+    }
+
+    MYSQL_RES *result = mysql_store_result(conn);
+    if (!result) {
+        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
+        return sales_point;
+    }
+
+    MYSQL_ROW row = mysql_fetch_row(result);
+    if (row) {
+        sales_point.id = atoi(row[0]);
+        strncpy(sales_point.name, row[1], sizeof(sales_point.name) - 1);
+        strncpy(sales_point.legal_entity_id, row[2], sizeof(sales_point.legal_entity_id) - 1);
+        strncpy(sales_point.phone_number, row[3], sizeof(sales_point.phone_number) - 1);
+    }
+
+    mysql_free_result(result);
+    return sales_point;
+}
+
+
+/*
+==========================================================================
                                 PRODUCTOS
 ==========================================================================
 */
@@ -144,19 +181,19 @@ void drop_product(MYSQL *conn, const char *code) {
     }
 }
 
-MYSQL_RES *get_last_quot_id(MYSQL *conn) {
+/*
+==========================================================================
+                            COTIZACIONES
+==========================================================================
+*/
+
+MYSQL_RES *get_last_quotation_id(MYSQL *conn) {
     if (mysql_query(conn, "CALL getLastQuotId()")) {
         fprintf(stderr, "Error al ejecutar el procedimiento almacenado: %s\n", mysql_error(conn));
         return NULL;
     }
     return mysql_store_result(conn);
 }
-
-/*
-==========================================================================
-                            COTIZACIONES
-==========================================================================
-*/
 
 void create_quotation(MYSQL *conn, Quotation *quotation) {
     char query[256];
@@ -284,9 +321,24 @@ MYSQL_RES *get_quotation_lines(MYSQL *conn, int quotation_id) {
 
 /*
 ==========================================================================
+                              FACTURACIÓN
+==========================================================================
+*/
+
+MYSQL_RES *get_last_invoice_id(MYSQL *conn) {
+    if (mysql_query(conn, "CALL getLastInvoiceId()")) {
+        fprintf(stderr, "Error al ejecutar el procedimiento almacenado: %s\n", mysql_error(conn));
+        return NULL;
+    }
+    return mysql_store_result(conn);
+}
+
+/*
+==========================================================================
                                 LOGIN
 ==========================================================================
 */
+
 void hash_to_hex(const unsigned char *hash, char *hex_str, size_t length)
 {
     for (size_t i = 0; i < length; i++) {

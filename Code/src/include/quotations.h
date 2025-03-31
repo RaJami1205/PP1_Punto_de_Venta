@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "models.h"
 #include "db_handler.h"
 #include "products.h"
@@ -13,6 +14,9 @@
 
 static Quotation current_quotation;
 static bool edit_quotation = false;
+
+// Función para obtener el puntero de la cotización actual
+Quotation *get_current_quotation();
 
 // Función para obtener el último id de cotización
 int get_last_quo_id();
@@ -38,6 +42,9 @@ void ask_save_quotation();
 // Función para guardar la cotización en la bd
 void save_quotation();
 
+// Función para imprimir las cotizaciones
+void print_all_quotations(bool show_all_quots);
+
 // Función para imprimir la cotización
 void print_quotation();
 
@@ -47,9 +54,14 @@ void print_quotation_menu();
 // Función para manejar la creación de nueva cotización
 void new_quotation();
 
+// Buscar cotización mediante su id
 void search_quotation(int quotation_id);
 
+// Busca las líneas de una cotización mediante el id de la cotización
 void search_quotation_lines(int quotation_id);
+
+// Establece la cotización actual que está leyendo el sistema
+void set_current_quot();
 
 // Función para editar cotización existente
 void modify_quotation();

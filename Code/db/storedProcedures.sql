@@ -2,6 +2,14 @@ USE Sales_Points;
 
 DELIMITER $$
 
+-- Procedimiento para obtener la información del punto de venta
+CREATE PROCEDURE getSalesPoint()
+BEGIN
+	SELECT sales_point_id, name, legal_entity_id, phone_number
+    FROM Sales_Point
+    LIMIT 1;
+END $$
+
 -- Procedimiento para obtener todos los productos
 CREATE PROCEDURE GetAllProducts()
 BEGIN
@@ -50,6 +58,29 @@ BEGIN
         (product_id, name, cost, price, stock, product_family_id)
     VALUES
         (p_product_id, p_name, p_cost, p_price, p_stock, p_product_family_id);
+END $$
+
+CREATE PROCEDURE insertProductFamily
+(
+    IN p_product_family_id VARCHAR(50),
+    IN p_name VARCHAR(100)
+)
+BEGIN
+    DECLARE v_count INT;
+
+    -- Verificar si la familia ya existe
+    SELECT COUNT(*) INTO v_count 
+    FROM Product_Family 
+    WHERE product_family_id = p_product_family_id OR name = p_name;
+
+    -- Insertar solo si no existe
+    IF v_count = 0 THEN
+        INSERT INTO Product_Family (product_family_id, name)
+        VALUES (p_product_family_id, p_name);
+    ELSE
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Error: La familia de productos ya existe';
+    END IF;
 END $$
 
 CREATE PROCEDURE GetProductFamilyID(
@@ -240,6 +271,13 @@ CREATE PROCEDURE deleteQuotationLinesFromId
 BEGIN
     DELETE FROM Quotation_Lines
     WHERE quotation_id = p_quot_id AND quotation_line_id > p_id_from;
+END $$
+
+-- Procedimiento para obtener el último ID de cotización
+CREATE PROCEDURE getLastInvoiceId()
+BEGIN
+    SELECT MAX(invoice_id)
+    FROM Invoice i;
 END $$
 
 DELIMITER ;

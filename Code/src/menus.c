@@ -7,6 +7,7 @@
 ==========================================================================
 */
 void print_main_menu() {
+
     int opcion;
     
     printf("\n\n╔════════════════════════════════════════╗\n");
@@ -155,7 +156,7 @@ void print_general_submenu() {
     printf("║                                    ║\n");
     printf("║   [1] 📖 Consulta de Catálogo      ║\n");
     printf("║   [2] 💰 Crear Cotización          ║\n");
-    printf("║   [3] 💰 Modificar Cotización      ║\n");
+    printf("║   [3] ✏️  Modificar Cotización      ║\n");
     printf("║   [4] 🧾 Facturar                  ║\n");
     printf("║   [5] 🔙 Volver                    ║\n");
     printf("╚════════════════════════════════════╝\n");
@@ -177,7 +178,7 @@ void print_general_submenu() {
             break;
 
         case 4:
-            printf("Has seleccionado Facturar.\n");
+            invoices_menu();
             break;
 
         case 5:
@@ -186,8 +187,7 @@ void print_general_submenu() {
 
         default:
             printf("Opción inválida en el submenú de generales.\n");
-            print_general_submenu();
             break;
     }
-
+    print_general_submenu();
 }
