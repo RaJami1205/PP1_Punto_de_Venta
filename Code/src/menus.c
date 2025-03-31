@@ -6,44 +6,52 @@
                               MAIN MENU
 ==========================================================================
 */
+
 void print_main_menu() {
-
+    char input[10];
     int opcion;
-    
-    printf("\n\n╔════════════════════════════════════════╗\n");
-    printf("║     🛒  SISTEMA DE PUNTO DE VENTA      ║\n");
-    printf("╠════════════════════════════════════════╣\n");
-    printf("║                OPCIONES                ║\n");
-    printf("║                                        ║\n");
-    printf("║   [1] 📦  Panel Administrativo         ║\n");
-    printf("║   [2] 🛍️   Opciones Generales           ║\n");
-    printf("║   [3] ❌  Salir del Sistema            ║\n");
-    printf("╚════════════════════════════════════════╝\n");
-    
-    printf("\nSeleccione una opción: ");
 
-    scanf("%d", &opcion);
-    switch (opcion) {
-        case 1:
-            if (login()) {
-                print_admin_submenu();
-            } else {
-                printf("Usuario inválido. Por favor, ingrese credenciales correctas.\n");
-                print_main_menu();
-            }
-            break;
-        case 2:
-            print_general_submenu();
-            break;
-        case 3:
-            printf("\nGracias por utilizar el programa.\n");
-            return;
-            break;
-        default:
-            printf("Opcion inválida. Por favor, ingrese una opción válida.\n");
-            print_main_menu();
+    while (1) {
+        printf("\n\n╔════════════════════════════════════════╗\n");
+        printf("║     🛒  SISTEMA DE PUNTO DE VENTA      ║\n");
+        printf("╠════════════════════════════════════════╣\n");
+        printf("║                OPCIONES                ║\n");
+        printf("║                                        ║\n");
+        printf("║   [1] 📦  Panel Administrativo         ║\n");
+        printf("║   [2] 🛍️   Opciones Generales           ║\n");
+        printf("║   [3] ❌  Salir del Sistema            ║\n");
+        printf("╚════════════════════════════════════════╝\n");
+
+        printf("\nSeleccione una opción: ");
+        
+        fgets(input, sizeof(input), stdin);
+        
+        char *endptr;
+        opcion = strtol(input, &endptr, 10);
+
+        if (*endptr != '\n' && *endptr != '\0') {
+            printf("❌ Entrada inválida. Por favor, ingrese un número.\n");
+            continue;
+        }
+
+        switch (opcion) {
+            case 1:
+                if (login()) {
+                    print_admin_submenu();
+                }
+                break;
+            case 2:
+                print_general_submenu();
+                break;
+            case 3:
+                printf("\nGracias por utilizar el programa.\n");
+                return;
+            default:
+                printf("❌ Opción inválida. Por favor, ingrese un número del 1 al 3.\n");
+        }
     }
 }
+
 
 void hash_passwd(const char *password, unsigned char *hashedPassword) {
     SHA256_CTX sha256;
@@ -53,24 +61,44 @@ void hash_passwd(const char *password, unsigned char *hashedPassword) {
 }
 
 bool login() {
-    char username[30];
-    char password[30];
+    char username[MAX_USERNAME];
+    char password[MAX_PASSWORD];
     unsigned char hashed_password[HASH_SIZE];
     bool auth_success = false;
     
     printf("\nUsuario: ");
-    scanf("%s", username);
-    
+    if (fgets(username, sizeof(username), stdin) == NULL) {
+        printf("❌ Error al leer el usuario.\n");
+        return false;
+    }
+    username[strcspn(username, "\n")] = 0;  // Eliminar salto de línea
+
     printf("Contraseña: ");
-    scanf("%s", password);
+    if (fgets(password, sizeof(password), stdin) == NULL) {
+        printf("❌ Error al leer la contraseña.\n");
+        return false;
+    }
+    password[strcspn(password, "\n")] = 0;  // Eliminar salto de línea
+
+    if (strlen(username) == 0 || strlen(password) == 0) {
+        printf("❌ Usuario o contraseña no pueden estar vacíos.\n");
+        return false;
+    }
 
     hash_passwd(password, hashed_password);
 
     MYSQL *conn = connect_to_db();
+    if (conn == NULL) {
+        printf("❌ Error al conectar con la base de datos.\n");
+        return false;
+    }
 
     auth_success = validate_credentials(conn, username, hashed_password);
-
     close_db_connection(conn);
+
+    if (!auth_success) {
+        printf("❌ Credenciales incorrectas. \n");
+    }
 
     return auth_success;
 }
@@ -80,62 +108,63 @@ bool login() {
                              ADMIN MENU
 ==========================================================================
 */
+
 void print_admin_submenu() {
+    char input[10];
     int subopcion_A;
 
-    printf("\n");
-    printf("╔════════════════════════════════════════════╗\n");
-    printf("║        📦 Opciones de Administración       ║\n");
-    printf("╠════════════════════════════════════════════╣\n");
-    printf("║                  OPCIONES                  ║\n");
-    printf("║                                            ║\n");
-    printf("║   [1] 🏷️  Registrar familia de productos    ║\n");
-    printf("║   [2] 🆕 Registrar nuevo producto          ║\n");
-    printf("║   [3] ❌ Eliminar producto                 ║\n");
-    printf("║   [4] 📦 Cargar inventario                 ║\n");
-    printf("║   [5] 🧾 Consulta de facturas              ║\n");
-    printf("║   [6] 📊 Estadísticas                      ║\n");
-    printf("║   [7] 🔙 Volver                            ║\n");
-    printf("╚════════════════════════════════════════════╝\n");
+    while (1) {
+        printf("\n");
+        printf("╔════════════════════════════════════════════╗\n");
+        printf("║        📦 Opciones de Administración       ║\n");
+        printf("╠════════════════════════════════════════════╣\n");
+        printf("║                  OPCIONES                  ║\n");
+        printf("║                                            ║\n");
+        printf("║   [1] 🏷️  Registrar familia de productos    ║\n");
+        printf("║   [2] 🆕 Registrar nuevo producto          ║\n");
+        printf("║   [3] ❌ Eliminar producto                 ║\n");
+        printf("║   [4] 📦 Cargar inventario                 ║\n");
+        printf("║   [5] 🧾 Consulta de facturas              ║\n");
+        printf("║   [6] 📊 Estadísticas                      ║\n");
+        printf("║   [7] 🔙 Volver                            ║\n");
+        printf("╚════════════════════════════════════════════╝\n");
 
-    printf("\nSeleccione una opción: ");
-    scanf("%d", &subopcion_A);
+        printf("\nSeleccione una opción: ");
+        fgets(input, sizeof(input), stdin);
 
-    switch(subopcion_A) {
-        case 1:
-            printf("\n");
-            set_product_family();
-            print_admin_submenu();
-            
-        case 2:
-            printf("\n");
-            set_product();
-            print_admin_submenu();
+        char *endptr;
+        subopcion_A = strtol(input, &endptr, 10);
 
-        case 3:
-            delete_product();
-            print_admin_submenu();
+        if (*endptr != '\n' && *endptr != '\0') {
+            printf("❌ Entrada inválida. Por favor, ingrese un número.\n");
+            continue;
+        }
 
-        case 4:
-            loadProductStock();
-            print_admin_submenu();
-
-        case 5:
-            printf("Has seleccionado Estadísticas.\n");
-            break;
-
-        case 6:
-            print_main_menu();
-            break;
-        
-        case 7:
-            print_main_menu();
-            break;
-
-        default:
-            printf("Opción inválida en el submenú de administración.\n");
-            print_admin_submenu();
-            break;
+        switch (subopcion_A) {
+            case 1:
+                set_product_family();
+                break;
+            case 2:
+                set_product();
+                break;
+            case 3:
+                delete_product();
+                break;
+            case 4:
+                loadProductStock();
+                break;
+            case 5:
+                printf("Has seleccionado consultar factuuras.\n");
+                break;
+            case 6:
+                printf("Has seleccionado Estadísticas.\n");
+                break;
+            case 7:
+                print_main_menu();
+                return;
+            default:
+                printf("❌ Opción inválida en el submenú de administración.\n");
+        }
     }
 }
 
@@ -144,49 +173,54 @@ void print_admin_submenu() {
                             GENERAL MENU
 ==========================================================================
 */
+
 void print_general_submenu() {
+    char input[10];
     int subopcion_G;
 
-    printf("\n");
-    printf("╔════════════════════════════════════╗\n");
-    printf("║        🛍️  Opciones Generales       ║\n");
-    printf("╠════════════════════════════════════╣\n");
-    printf("║             OPCIONES               ║\n");
-    printf("║                                    ║\n");
-    printf("║   [1] 📖 Consulta de Catálogo      ║\n");
-    printf("║   [2] 💰 Crear Cotización          ║\n");
-    printf("║   [3] ✏️  Modificar Cotización      ║\n");
-    printf("║   [4] 🧾 Facturar                  ║\n");
-    printf("║   [5] 🔙 Volver                    ║\n");
-    printf("╚════════════════════════════════════╝\n");
+    while (1) {
+        printf("\n");
+        printf("╔════════════════════════════════════╗\n");
+        printf("║        🛍️  Opciones Generales       ║\n");
+        printf("╠════════════════════════════════════╣\n");
+        printf("║             OPCIONES               ║\n");
+        printf("║                                    ║\n");
+        printf("║   [1] 📖 Consulta de Catálogo      ║\n");
+        printf("║   [2] 💰 Crear Cotización          ║\n");
+        printf("║   [3] ✏️  Modificar Cotización      ║\n");
+        printf("║   [4] 🧾 Facturar                  ║\n");
+        printf("║   [5] 🔙 Volver                    ║\n");
+        printf("╚════════════════════════════════════╝\n");
 
-    printf("\nIngrese la opcion: ");
-    scanf("%d", &subopcion_G);
+        printf("\nIngrese la opción: ");
+        fgets(input, sizeof(input), stdin);
 
-    switch(subopcion_G) {
-        case 1:
-            print_products();
-            break;
+        char *endptr;
+        subopcion_G = strtol(input, &endptr, 10);
 
-        case 2:
-            new_quotation();
-            break;
+        if (*endptr != '\n' && *endptr != '\0') {
+            printf("❌ Entrada inválida. Por favor, ingrese un número.\n");
+            continue;
+        }
 
-        case 3:
-            modify_quotation();
-            break;
-
-        case 4:
-            invoices_menu();
-            break;
-
-        case 5:
-            print_main_menu();
-            break;
-
-        default:
-            printf("Opción inválida en el submenú de generales.\n");
-            break;
+        switch (subopcion_G) {
+            case 1:
+                print_products();
+                break;
+            case 2:
+                new_quotation();
+                break;
+            case 3:
+                modify_quotation();
+                break;
+            case 4:
+                invoices_menu();
+                break;
+            case 5:
+                print_main_menu();
+                return;
+            default:
+                printf("❌ Opción inválida en el submenú de generales.\n");
+        }
     }
-    print_general_submenu();
 }

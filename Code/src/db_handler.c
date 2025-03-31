@@ -88,7 +88,7 @@ Sales_Point get_sales_point(MYSQL *conn) {
 ==========================================================================
 */
 
-void insert_product_family(MYSQL *conn, const char *code, const char *name) {
+bool insert_product_family(MYSQL *conn, const char *code, const char *name) {
     char query[256];
 
     snprintf(query, sizeof(query),
@@ -96,12 +96,14 @@ void insert_product_family(MYSQL *conn, const char *code, const char *name) {
              code, name);
 
     if (mysql_query(conn, query)) {
-        fprintf(stderr, "Error al insertar familia de productos: %s\n", mysql_error(conn));
+        //fprintf(stderr, "Error al insertar familia de productos: %s\n", mysql_error(conn));
+        return false;
     }
+    return true;
 }
 
 
-void insert_product(MYSQL *conn, Product *product) {
+bool insert_product(MYSQL *conn, Product *product) {
     char query[500];
 
     // Llamar directamente al procedimiento almacenado insertNewProduct
@@ -116,8 +118,10 @@ void insert_product(MYSQL *conn, Product *product) {
              product->stock);  // stock
 
     if (mysql_query(conn, query)) {
-        fprintf(stderr, "Error al insertar producto: %s\n", mysql_error(conn));
+        //fprintf(stderr, "Error al insertar producto: %s\n", mysql_error(conn));
+        return false;
     }
+    return true;
 }
 
 MYSQL_RES *search_product(MYSQL *conn, const char *search_value) {

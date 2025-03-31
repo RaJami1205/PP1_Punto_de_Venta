@@ -13,6 +13,13 @@ void print_products() {
         return;
     }
 
+    if (mysql_num_rows(res) == 0) {
+        printf("No hay productos disponibles en la base de datos.\n");
+        mysql_free_result(res);
+        mysql_close(conn);
+        return;
+    }
+
     MYSQL_ROW row;
     printf("Productos Disponibles:\n");
 
@@ -42,7 +49,6 @@ void print_products() {
 
 void print_filtered_products() {
     char family_input[MAX_INPUT];
-    while (getchar() != '\n' && getchar() != EOF);
 
     printf("Ingrese el nombre de la familia de productos a filtrar: ");
     fgets(family_input, MAX_INPUT, stdin);
@@ -133,8 +139,9 @@ void set_product_family() {
 
     // Insertar en la base de datos
     for (int i = 0; i < count; i++) {
-        // TO-DO IMPRIMIR LINEAS QUE NO SE AGREGUEN
-        insert_product_family(conn, product_family[i].code, product_family[i].name);
+        if(!insert_product_family(conn, product_family[i].code, product_family[i].name)) {
+            printf("%s %s no pudo ser cargado.\n", product_family[i].code, product_family[i].name);
+        }
     }
 
     // Cerrar conexión
@@ -184,24 +191,13 @@ void set_product() {
 
     // Insertar los productos en la base de datos
     for (int i = 0; i < count; i++) {
-        // TO-DO IMPRIMIR LINEAS QUE NO SE AGREGUEN
-        insert_product(conn, &products[i]);
+        if(!insert_product(conn, &products[i])) {
+            printf("%s %s no pudo ser cargado.\n", products[i].family, products[i].name);
+        }
     }
 
     // Cerrar la conexión a la base de datos
     close_db_connection(conn);
-
-    // Imprimir los productos cargados
-    printf("Productos cargados:\n");
-    for (int i = 0; i < count; i++) {
-        printf("Código: %s, Nombre: %s, Familia: %s, Costo: %.2f, Precio: %.2f, Stock: %d\n",
-               products[i].code,
-               products[i].name,
-               products[i].family,
-               products[i].cost,
-               products[i].price,
-               products[i].stock);
-    }
 }
 
 void delete_product() {
