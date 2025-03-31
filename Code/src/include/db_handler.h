@@ -37,10 +37,10 @@ Sales_Point get_sales_point(MYSQL *conn);
 ==========================================================================
 */
 // Función para insertar una nueva familia de productos
-void insert_product_family(MYSQL *conn, const char *code, const char *name);
+bool insert_product_family(MYSQL *conn, const char *code, const char *name);
 
 // Función para insertar un nuevo producto
-void insert_product(MYSQL *conn, Product *product);
+bool insert_product(MYSQL *conn, Product *product);
 
 // Función para obtener producto por nombre o id
 MYSQL_RES *search_product(MYSQL *conn, const char *input);

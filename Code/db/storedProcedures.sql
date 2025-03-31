@@ -259,7 +259,7 @@ CREATE PROCEDURE searchQuotation
 BEGIN
     SELECT quotation_id, sub_total, total_taxes, total, state
     FROM Quotation
-    WHERE p_quota_id = quotation_id;
+    WHERE p_quota_id = quotation_id AND state = 'Pendiente de Pago';
 END $$
 
 -- Procedimiento para buscar líneas de cotización por ID de cotización
@@ -288,8 +288,7 @@ BEGIN
 END $$
 
 -- Procedimiento para actualizar o insertar una línea de cotización
-CREATE PROCEDURE updateQuotationLine
-(
+CREATE PROCEDURE updateQuotationLine(
     IN p_quot_line_id INT,
     IN p_quot_id INT,
     IN p_product_name VARCHAR(100),
@@ -299,21 +298,32 @@ CREATE PROCEDURE updateQuotationLine
 )
 BEGIN
     DECLARE p_product_id VARCHAR(50);
-    
+    DECLARE exists_flag INT;
+
     -- Obtener el ID del producto
-    SELECT product_id INTO p_product_id FROM Product WHERE name = p_product_name LIMIT 1;
-    
-    -- Intentar actualizar la línea existente
-    UPDATE Quotation_Lines
-    SET 
-        product_id = p_product_id, 
-        quantity = p_qty, 
-        line_sub_total = p_line_sub_total, 
-        line_total_taxes = p_line_total_taxes
-    WHERE quotation_line_id = p_quot_line_id AND quotation_id = p_quot_id;
-    
-    -- Si no se actualizó ninguna fila, insertar una nueva línea
-    IF ROW_COUNT() = 0 THEN
+    SELECT product_id INTO p_product_id 
+    FROM Product 
+    WHERE name = p_product_name 
+    LIMIT 1;
+
+    -- Verificar si la línea ya existe
+    SELECT 1 INTO exists_flag 
+    FROM Quotation_Lines 
+    WHERE quotation_line_id = p_quot_line_id 
+      AND quotation_id = p_quot_id 
+    LIMIT 1;
+
+    -- Si existe, actualizar; si no, insertar
+    IF exists_flag IS NOT NULL THEN
+        UPDATE Quotation_Lines
+        SET 
+            product_id = p_product_id, 
+            quantity = p_qty, 
+            line_sub_total = p_line_sub_total, 
+            line_total_taxes = p_line_total_taxes
+        WHERE quotation_line_id = p_quot_line_id 
+          AND quotation_id = p_quot_id;
+    ELSE
         INSERT INTO Quotation_Lines (quotation_line_id, quotation_id, product_id, quantity, line_sub_total, line_total_taxes)
         VALUES (p_quot_line_id, p_quot_id, p_product_id, p_qty, p_line_sub_total, p_line_total_taxes);
     END IF;
@@ -379,6 +389,11 @@ BEGIN
     ELSE
         INSERT INTO Invoice_Lines (invoice_line_id, invoice_id, product_id, quantity, line_sub_total, line_total_taxes)
         VALUES (p_invoice_line_id, p_invoice_id, p_product_id, p_qty, p_line_sub_total, p_line_total_taxes);
+        
+        -- Restar al stock
+        UPDATE Product
+        SET stock = stock - p_qty
+        WHERE product_id = p_product_id;
     END IF;
 END $$
 

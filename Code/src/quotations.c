@@ -59,40 +59,50 @@ bool product_exists(const char *input, Product *product) {
 }
 
 void quote_product(bool is_filtered) {
-    int opt;
-    
-    if (!is_filtered) {
-        print_products(); 
-    } else {
-        print_filtered_products();
-    }
 
-    printf("\n\n[1] Seleccionar Producto\n");
-    printf("[2] Filtrar por Familia\n");
-    printf("[3] Mostrar Todos los Productos\n");
-    printf("[4] Regresar\n");
-    
-    printf("\nSeleccione una opción\n= ");
-    scanf("%d", &opt);
+    // TO-DO SOLUCIONAR DOBLE ENTER
+    while (1) {
+        if (!is_filtered) {
+            print_products(); 
+        } else {
+            print_filtered_products();
+        }
 
-    switch ((opt))
-    {
-    case 1:
-        add_product_to_quotation();
-        break;
-    case 2:
-        quote_product(true);
-        break;
-    case 3:
-        quote_product(false);
-        break;
-    case 4:
-        print_quotation_menu();
-        break;
-    default:
-        printf("\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nOpción Inválida, Intente de nuevo.\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-        quote_product(false);
-        break;
+        char input[10];
+        int opt;
+
+        printf("\nOpciones:\n");
+        printf("\n[1] Seleccionar Producto\n");
+        printf("[2] Filtrar por Familia\n");
+        printf("[3] Mostrar Todos los Productos\n");
+        printf("[4] Regresar\n");
+        printf("\nSeleccione una opción\n= ");
+        fgets(input, sizeof(input), stdin);
+
+        char *endptr;
+        opt = strtol(input, &endptr, 10);
+
+        if (*endptr != '\n' && *endptr != '\0') {
+            printf("❌ Entrada inválida. Por favor, ingrese un número.\n");
+            continue;
+        }
+
+        switch (opt) {
+            case 1:
+                add_product_to_quotation();
+                break;
+            case 2:
+                quote_product(true);
+                break;
+            case 3:
+                quote_product(false);
+                break;
+            case 4:
+                print_quotation_menu();
+                return;
+            default:
+                printf("❌ Opción Inválida, Intente de nuevo.\n");
+        }
     }
 }
 
@@ -111,7 +121,6 @@ void add_product_to_quotation() {
     int quantity;
     Product selected_product;
 
-    while (getchar() != '\n' && getchar() != EOF);
 
     printf("\nIngrese el ID o nombre del producto que desea agregar (0 para cancelar): ");
     fgets(product_input, MAX_INPUT, stdin);
@@ -124,19 +133,29 @@ void add_product_to_quotation() {
     }
 
     if (!product_exists(product_input, &selected_product)) {
-        printf("\nError: El producto '%s' no existe. Intente nuevamente.\n", product_input);
-        add_product_to_quotation();
+        printf("\n❌ Error: El producto '%s' no existe. Intente nuevamente.\n", product_input);
+        quote_product(false);
         return;
     }
 
     bool correct_quantity = false;
+    char input[20];
 
+    
     while (!correct_quantity) {
         printf("Ingrese la cantidad deseada: ");
-        if (scanf("%d", &quantity) != 1 || quantity <= 0 || quantity > selected_product.stock) {
+        fgets(input, sizeof(input), stdin);
 
-            printf("\nError: Cantidad no válida. Intente nuevamente.\n");
-            while (getchar() != '\n');
+        char *endptr;
+        quantity = strtol(input, &endptr, 10);
+
+        if (*endptr != '\n' && *endptr != '\0') {
+            printf("\n❌ Error: Entrada no válida. Intente nuevamente.\n");
+            continue;
+        }
+
+        if (quantity <= 0 || quantity > selected_product.stock) {
+            printf("\n❌ Error: Cantidad no válida. Debe estar entre 1 y %d.\n", selected_product.stock);
         } else {
             correct_quantity = true;
         }
@@ -144,17 +163,11 @@ void add_product_to_quotation() {
 
     Quotation_Line *existing_line = find_product_line(selected_product.name);
 
+    // Si el producto ya está en la cotización, actualizar cantidad y total
     if (existing_line) {
-        if (selected_product.stock - existing_line->quantity <= 0) {
-            printf("\nError: No hay más cantidad en stock para agregar.\n");
-            quote_product(false);
-            return;
-        }
-        // Si el producto ya está en la cotización, actualizar cantidad y total
-
 
         if (existing_line->quantity + quantity > selected_product.stock) {
-            printf("\nError: No hay más cantidad en stock para agregar.\n");
+            printf("\n❌ Error: No hay suficiente stock disponible.\n");
             quote_product(false);
             return;
         }
@@ -170,12 +183,13 @@ void add_product_to_quotation() {
         current_quotation.total_taxes += existing_line->line_total_taxes;
         current_quotation.total = current_quotation.sub_total + current_quotation.total_taxes;
 
-        printf("\nCantidad actualizada en la cotización.\n");
+        printf("\n✅ Cantidad actualizada en la cotización.\n");
     } else {
         // Agregar nuevo producto a la cotización
         current_quotation.lines = realloc(current_quotation.lines, (current_quotation.num_lines + 1) * sizeof(Quotation_Line));
+
         if (!current_quotation.lines) {
-            printf("\nError: No se pudo asignar memoria.\n");
+            printf("\n❌ Error: No se pudo asignar memoria.\n");
             print_quotation_menu();
             return;
         }
@@ -194,41 +208,59 @@ void add_product_to_quotation() {
         current_quotation.total = current_quotation.sub_total + current_quotation.total_taxes;
         current_quotation.num_lines++;
 
-        printf("\nProducto agregado correctamente.\n");
+        printf("\n✅ Producto agregado correctamente.\n");
     }
 
-    char option;
-    printf("\n¿Desea agregar otro producto? (s/n): ");
-    while (getchar() != '\n');
-    scanf("%c", &option);
+    char option[10];
 
-    if (option == 's' || option == 'S') {
-        print_products();
-        add_product_to_quotation();
-    } else {
-        print_quotation_menu();
+    while (1) {
+        printf("\n¿Desea agregar otro producto? (s/n): ");
+        
+        fgets(option, sizeof(option), stdin);
+
+        if (option[0] == 's' || option[0] == 'S') {
+            print_products();
+            add_product_to_quotation();
+            return;
+        } else if (option[0] == 'n' || option[0] == 'N') {
+            print_quotation_menu();
+            return;
+        } else {
+            printf("❌ Entrada inválida. Por favor, ingrese 's' o 'n'.\n");
+        }
     }
 }
 
 void rm_product_from_quotation(int line_to_remove) {
-
     if (current_quotation.num_lines == 0) {
-        printf("\nNo hay productos en la cotización para eliminar.\n");
+        printf("\n❌ No hay productos en la cotización para eliminar.\n");
         print_quotation_menu();
         return;
     }
 
+    char input[20];
+
     if (line_to_remove == 0) {
         print_quotation();
 
-        printf("\nLas siguientes líneas están en la cotización:\n");
+        printf("\n📌 Líneas en la cotización:\n");
         for (int i = 0; i < current_quotation.num_lines; i++) {
-            printf("%d: %s (Cantidad: %d)\n", current_quotation.lines[i].line_id, current_quotation.lines[i].product_name, current_quotation.lines[i].quantity);
+            printf(" [%d] %s (Cantidad: %d)\n", i + 1, current_quotation.lines[i].product_name, current_quotation.lines[i].quantity);
         }
-    
-        printf("\nIngrese el número de la línea a eliminar (0 para cancelar): ");
-        if (scanf("%d", &line_to_remove) != 1 || line_to_remove <= 0 || line_to_remove > current_quotation.num_lines) {
-            printf("\nNúmero de línea inválido.\n");
+
+        while (1) {
+            printf("\n📝 Ingrese el número de la línea a eliminar (0 para cancelar): ");
+            fgets(input, sizeof(input), stdin);
+
+            if (sscanf(input, "%d", &line_to_remove) == 1 && line_to_remove >= 0 && line_to_remove <= current_quotation.num_lines) {
+                break; // Entrada válida, salir del bucle
+            } else {
+                printf("\n❌ Número de línea inválido. Intente nuevamente.\n");
+            }
+        }
+
+        if (line_to_remove == 0) {
+            printf("\n🔙 Operación cancelada.\n");
             print_quotation_menu();
             return;
         }
@@ -258,12 +290,12 @@ void rm_product_from_quotation(int line_to_remove) {
     // Reasignar memoria para evitar desperdicio
     current_quotation.lines = realloc(current_quotation.lines, current_quotation.num_lines * sizeof(Quotation_Line));
     if (current_quotation.num_lines > 0 && current_quotation.lines == NULL) {
-        printf("\nError al reasignar memoria.\n");
+        printf("\n⚠️ Error al reasignar memoria.\n");
         print_quotation_menu();
         return;
     }
 
-    printf("\nLínea eliminada correctamente.\n");
+    printf("\n✅ Línea eliminada correctamente.\n");
 
     print_quotation_menu();
 }
@@ -280,83 +312,100 @@ void ask_save_quotation() {
 
     print_quotation();
 
-    char option;
-    printf("\n¿Salir sin guardar? (s/n): ");
-    while (getchar() != '\n');
-    scanf("%c", &option);
+    char option[10];
 
-    if (option == 's' || option == 'S') {
-        while (getchar() != '\n');
-        print_general_submenu();
-    } else {
-        save_quotation();
+    while (1) {
+        printf("\n¿Salir sin guardar? (s/n): ");
+        fgets(option, sizeof(option), stdin);
+
+        if (option[0] == 's' || option[0] == 'S') {
+            print_general_submenu();
+            return;
+        } else if (option[0] == 'n' || option[0] == 'N') {
+            save_quotation();
+            return;
+        } else {
+            printf("\n❌ Entrada inválida. Por favor, ingrese 's' o 'n'.\n");
+        }
     }
 }
 
+
 void save_quotation() {
     if (current_quotation.num_lines == 0) {
-        printf("\nNo hay productos en la cotización para guardar.\n");
+        printf("\n❌ No hay productos en la cotización para guardar.\n");
         return;
     }
 
-    char option;
-    printf("\n¿Desea guardar la cotización? (s/n): ");
-    while (getchar() != '\n');
-    scanf("%c", &option);
+    char option[10];
 
-    if (option == 'n' || option == 'N') {
-        while (getchar() != '\n');
-        print_quotation_menu();
+    while (1) {
+        printf("\n¿Desea guardar la cotización? (s/n): ");
+        fgets(option, sizeof(option), stdin);
+
+        if (option[0] == 'n' || option[0] == 'N') {
+            print_quotation_menu();
+            return;
+        } else if (option[0] == 's' || option[0] == 'S') {
+            break;
+        } else {
+            printf("\n❌ Entrada inválida. Por favor, ingrese 's' o 'n'.\n");
+        }
     }
 
+    // Conectar con la base de datos
     MYSQL *conn = connect_to_db();
     if (!conn) {
-        printf("\nError al conectar con la base de datos.\n");
+        printf("\n❌ Error al conectar con la base de datos.\n");
         return;
     }
 
     if (edit_quotation) {
-
-        // Insertar la cotización en la base de datos
         update_quotation(conn, &current_quotation);
-    
+
         for (int i = 0; i < current_quotation.num_lines; i++) {
             current_quotation.lines[i].quotation_id = current_quotation.id;
             update_quotation_lines(conn, &current_quotation.lines[i]);
         }
 
         delete_modified_quotation_lines(conn, &current_quotation);
-    
-        printf("\nCotización actualizada exitosamente.\n");
-    } else {
 
-    
-        // Insertar la cotización en la base de datos
+        printf("\n✅ Cotización actualizada exitosamente.\n");
+    } else {
         create_quotation(conn, &current_quotation);
-    
+
         for (int i = 0; i < current_quotation.num_lines; i++) {
             current_quotation.lines[i].quotation_id = current_quotation.id;
             add_line_to_quotation(conn, &current_quotation.lines[i]);
         }
-    
-        printf("\nCotización guardada exitosamente.\n");
+
+        printf("\n✅ Cotización guardada exitosamente.\n");
     }
+
     close_db_connection(conn);
     print_general_submenu();
 }
 
-void print_all_quotations(bool show_all_quots) {
+
+bool print_all_quotations(bool show_all_quots) {
     MYSQL *conn = connect_to_db();
     if (!conn) {
-        printf("\nError al conectar con la base de datos.\n");
-        return;
+        printf("\n❌ Error al conectar con la base de datos.\n");
+        return false;
     }
 
     MYSQL_RES *result = get_quotations(conn, show_all_quots);
     if (!result) {
-        printf("\nError al obtener las cotizaciones.\n");
+        printf("\n❌ Error al obtener las cotizaciones.\n");
         close_db_connection(conn);
-        return;
+        return false;
+    }
+
+    if (mysql_num_rows(result) == 0) {
+        printf("\n❌ No hay cotizaciones disponibles.\n");
+        mysql_free_result(result);
+        close_db_connection(conn);
+        return false;
     }
 
     MYSQL_ROW row;
@@ -373,6 +422,7 @@ void print_all_quotations(bool show_all_quots) {
 
     mysql_free_result(result);
     close_db_connection(conn);
+    return true;
 }
 
 void print_quotation() {
@@ -397,41 +447,51 @@ void print_quotation() {
 
 }
 
+
 void print_quotation_menu() {
+    while (1) {
+        if (current_quotation.num_lines > 0) {
+            print_quotation();
+        }
 
-    if (current_quotation.num_lines > 0) {
-        print_quotation();
-    }
-    
-    int option;
+        char input[10];
+        int option;
 
-    printf("\n\n[1] Agregar Producto\n");
-    printf("[2] Quitar Producto\n");
-    printf("[3] Guardar Cotización\n");
-    printf("[4] Salir\n");
-    
-    printf("\nSeleccione una opción\n= ");
-    scanf("%d", &option);
+        printf("\nOpciones:\n");
+        printf("\n[1] Agregar Producto\n");
+        printf("[2] Quitar Producto\n");
+        printf("[3] Guardar Cotización\n");
+        printf("[4] Salir\n");
 
-    switch ((option))
-    {
-    case 1:
-        quote_product(false);
-        break;
-    case 2:
-        rm_product_from_quotation(0);
-        break;
-    case 3:
-        save_quotation();
-        break;
-    case 4:
-        ask_save_quotation();
-        print_general_submenu();
-        break;
-    default:
-        printf("\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nOpción Inválida, Intente de nuevo.\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-        print_quotation_menu();
-        break;
+        printf("\nSeleccione una opción\n= ");
+        fgets(input, sizeof(input), stdin);
+
+        char *endptr;
+        option = strtol(input, &endptr, 10);
+
+        if (*endptr != '\n' && *endptr != '\0') {
+            printf("\n❌ Entrada inválida. Ingrese un número entre 1 y 4.\n");
+            continue;
+        }
+
+        switch (option) {
+            case 1:
+                quote_product(false);
+                break;
+            case 2:
+                rm_product_from_quotation(0);
+                break;
+            case 3:
+                save_quotation();
+                break;
+            case 4:
+                ask_save_quotation();
+                print_general_submenu();
+                return;
+            default:
+                printf("\n❌ Opción inválida. Intente de nuevo.\n");
+                break;
+        }
     }
 }
 
@@ -440,33 +500,34 @@ void new_quotation() {
     current_quotation.id = get_last_quo_id() + 1;
     current_quotation.num_lines = 0;
     current_quotation.lines = NULL;
+    edit_quotation = false;
 
     printf("\nCOTIZACIÓN N°%d", current_quotation.id);
     print_quotation_menu();
 }
 
-void search_quotation(int quotation_id) {
+bool search_quotation(int quotation_id) {
     MYSQL *conn = connect_to_db();
     if (!conn) {
-        printf("\nError al conectar con la base de datos.\n");
-        return;
+        printf("\n❌ Error al conectar con la base de datos.\n");
+        return false;
     }
 
     // Obtener cotización
     MYSQL_RES *quotation_result = get_quotation_by_id(conn, quotation_id);
     if (!quotation_result) {
-        printf("\nNo se encontró la cotización con ID %d.\n", quotation_id);
+        printf("\n❌ No se encontró la cotización con ID %d.\n", quotation_id);
         close_db_connection(conn);
-        return;
+        return false;
     }
 
     // Asignar datos de la cotización a current_quotation
     MYSQL_ROW row = mysql_fetch_row(quotation_result);
     if (!row) {
-        printf("\nNo se encontraron datos para la cotización.\n");
+        printf("\n❌ No se encontraron datos para la cotización.\n");
         mysql_free_result(quotation_result);
         close_db_connection(conn);
-        return;
+        return false;
     }
 
     current_quotation.id = atoi(row[0]);
@@ -479,6 +540,7 @@ void search_quotation(int quotation_id) {
 
     mysql_free_result(quotation_result);
     close_db_connection(conn);
+    return true;
 }
 
 void search_quotation_lines(int quotation_id) {
@@ -487,7 +549,7 @@ void search_quotation_lines(int quotation_id) {
     // Obtener líneas de cotización
     MYSQL_RES *lines_result = get_quotation_lines(conn, quotation_id);
     if (!lines_result) {
-        printf("\nError al obtener las líneas de la cotización.\n");
+        printf("\n❌ Error al obtener las líneas de la cotización.\n");
         close_db_connection(conn);
         return;
     }
@@ -496,7 +558,7 @@ void search_quotation_lines(int quotation_id) {
     if (num_lines > 0) {
         current_quotation.lines = malloc(num_lines * sizeof(Quotation_Line));
         if (!current_quotation.lines) {
-            printf("\nError al asignar memoria.\n");
+            printf("\n❌ Error al asignar memoria.\n");
             mysql_free_result(lines_result);
             close_db_connection(conn);
             return;
@@ -521,25 +583,40 @@ void search_quotation_lines(int quotation_id) {
     close_db_connection(conn);
 }
 
-void set_current_quot() {
+bool set_current_quot() {
     int quotation_id;
-    printf("Seleccione una cotización mediante su ID\n= ");
-    
-    if (scanf("%d", &quotation_id) != 1 || quotation_id <= 0) {
-        printf("\nID inválido. Intente de nuevo.\n");
-        set_current_quot();
+    char input[20];
+
+    while (1) {
+
+        printf("Seleccione una cotización mediante su ID\n= ");
+        fgets(input, sizeof(input), stdin);
+
+        if (sscanf(input, "%d", &quotation_id) == 1 && quotation_id > 0) {
+            break;
+        } else {
+            printf("\n\n❌ ID inválido. Intente de nuevo.\n\n");
+        }
     }
 
-    search_quotation(quotation_id);
-    search_quotation_lines(quotation_id);
+    if (search_quotation(quotation_id)) {
+        search_quotation_lines(quotation_id);
+        return true;
+    }
+    return false;
 }
+
 
 void modify_quotation() {
     edit_quotation = true;
 
-    print_all_quotations(false);
+    if(!print_all_quotations(false)) {
+        print_general_submenu();
+        return;
+    }
     printf("\nModificar Cotización\n");
 
-    set_current_quot();
-    print_quotation_menu();
+    if (set_current_quot()) {
+        print_quotation_menu();
+    }
 }

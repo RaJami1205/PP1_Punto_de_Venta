@@ -46,7 +46,7 @@ void ask_save_quotation();
 void save_quotation();
 
 // Función para imprimir las cotizaciones
-void print_all_quotations(bool show_all_quots);
+bool print_all_quotations(bool show_all_quots);
 
 // Función para imprimir la cotización
 void print_quotation();
@@ -58,13 +58,13 @@ void print_quotation_menu();
 void new_quotation();
 
 // Buscar cotización mediante su id
-void search_quotation(int quotation_id);
+bool search_quotation(int quotation_id);
 
 // Busca las líneas de una cotización mediante el id de la cotización
 void search_quotation_lines(int quotation_id);
 
 // Establece la cotización actual que está leyendo el sistema
-void set_current_quot();
+bool set_current_quot();
 
 // Función para editar cotización existente
 void modify_quotation();

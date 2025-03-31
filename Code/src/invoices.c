@@ -1,36 +1,45 @@
 #include "./include/invoices.h"
 
 void invoices_menu() {
-
     printf("\nFacturar Cotización\n");
 
-    print_all_quotations(false);
+    if(!print_all_quotations(false)) {
+        return;
+    }
 
     int option;
+    char input[20];  // Buffer para la entrada del usuario
 
-    printf("Opciones:\n");
-    printf("[1] Seleccionar Cotización\n");
-    printf("[2] Ver Detalles de Cotización\n");
-    printf("[3] Salir\n");
+    while (1) {
+        printf("\nOpciones:\n");
+        printf("[1] Seleccionar Cotización\n");
+        printf("[2] Ver Detalles de Cotización\n");
+        printf("[3] Salir\n");
 
-    printf("\nSeleccione una opción\n= ");
-    scanf("%d", &option);
+        printf("\nSeleccione una opción\n= ");
+        fgets(input, sizeof(input), stdin);
 
-    switch ((option))
-    {
-    case 1:
-        close_invoice();
-        break;
-    case 2:
-        seek_quotation();
-        break;
-    case 3:
-        print_general_submenu();
-        break;
-    default:
-        printf("\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nOpción Inválida, Intente de nuevo.\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-        invoices_menu();
-        break;
+        if (sscanf(input, "%d", &option) == 1 && option >= 1 && option <= 3) {
+            break;  // Si la opción es válida, salir del bucle
+        } else {
+            printf("\n❌ Opción inválida. Por favor ingrese una opción entre 1 y 3.\n");
+        }
+    }
+
+    switch (option) {
+        case 1:
+            close_invoice();
+            break;
+        case 2:
+            seek_quotation();
+            break;
+        case 3:
+            print_general_submenu();
+            break;
+        default:
+            printf("\n\n❌ Opción Inválida, Intente de nuevo.\n\n");
+            invoices_menu();
+            break;
     }
 }
 
@@ -43,39 +52,46 @@ void close_invoice() {
 
     quotation_to_invoice();
 
-    // Obtener la fecha actual del sistema
     get_current_date(current_invoice->date);
 
-    // Obtener el nombre del cliente
     printf("\n\nIngrese el nombre del cliente para la factura: ");
-    scanf(" %[^\n]", current_invoice->customer_name);  // Captura con espacios
+    fgets(current_invoice->customer_name, sizeof(current_invoice->customer_name), stdin);
+    current_invoice->customer_name[strcspn(current_invoice->customer_name, "\n")] = '\0';  // Limpiar el salto de línea
 
     print_invoice();
-                
-    char option;
 
-    printf("¿Desea realizar la facturación? (s/n)\n= ");
-    while (getchar() != '\n');
-    scanf("%c", &option);
+    char option;
+    char input[3];
+
+    while (1) {
+        printf("\n¿Desea realizar la facturación? (s/n)\n= ");
+        fgets(input, sizeof(input), stdin);
+
+        // Verificamos si el input es válido
+        if (sscanf(input, "%c", &option) == 1 && (option == 's' || option == 'S' || option == 'n' || option == 'N')) {
+            break;
+        } else {
+            printf("❌ Entrada inválida. Por favor, ingrese 's' o 'n'.\n");
+        }
+    }
 
     if (option == 's' || option == 'S') {
-        while (getchar() != '\n');
         save_invoice();
     } else {
         invoices_menu();
     }
-    // SALIR
 }
+
 
 void save_invoice() {
     if (current_invoice->num_lines == 0) {
-        printf("\nNo hay productos en la factura para guardar.\n");
+        printf("\n❌ No hay productos en la factura para guardar.\n");
         return;
     }
 
     MYSQL *conn = connect_to_db();
     if (!conn) {
-        printf("\nError al conectar con la base de datos.\n");
+        printf("\n❌ Error al conectar con la base de datos.\n");
         return;
     }
 
@@ -86,7 +102,7 @@ void save_invoice() {
         add_line_to_invoice(conn, &current_invoice->lines[i]);
     }
 
-    printf("\nFacturación guardada exitosamente.\n");
+    printf("\n✅ Facturación guardada exitosamente.\n");
     close_db_connection(conn);
     print_general_submenu();
 }
@@ -95,7 +111,7 @@ int get_last_inv_id() {
     
     MYSQL *conn = connect_to_db();
     if (!conn) {
-        fprintf(stderr, "Error al conectar con la base de datos.\n");
+        fprintf(stderr, "❌ Error al conectar con la base de datos.\n");
         return -1;
     }
     
@@ -118,14 +134,14 @@ void quotation_to_invoice() {
     Quotation *quot = get_current_quotation();
     
     if (quot == NULL) {
-        printf("Error: No hay cotización activa.\n");
+        printf("❌ Error: No hay cotización activa.\n");
         return;
     }
 
     // Crear nueva factura
     current_invoice = (Invoice *)malloc(sizeof(Invoice));
     if (current_invoice == NULL) {
-        printf("Error: No se pudo asignar memoria para la factura.\n");
+        printf("❌ Error: No se pudo asignar memoria para la factura.\n");
         return;
     }
 
@@ -142,7 +158,7 @@ void quotation_to_invoice() {
     // Asignar memoria para las líneas de factura
     current_invoice->lines = (Invoice_Line *)malloc(sizeof(Invoice_Line) * quot->num_lines);
     if (current_invoice->lines == NULL) {
-        printf("Error: No se pudo asignar memoria para las líneas de factura.\n");
+        printf("❌ Error: No se pudo asignar memoria para las líneas de factura.\n");
         free(current_invoice);
         return;
     }
@@ -210,14 +226,26 @@ void adjust_quantities(Quotation *quot) {
             adjusted = false;
 
             while (!adjusted) {
-                printf("La línea N°%d %s cotiza %d unidades, pero en stock hay únicamente %d\n", ql->line_id, ql->product_name, ql->quantity, product_stock);
+                printf("La línea N°%d %s cotiza %d unidades, pero en stock hay únicamente %d\n", 
+                       ql->line_id, ql->product_name, ql->quantity, product_stock);
                 printf("¿Desea ajustar la cantidad? (s/n)\n");
                 printf("[S]í, quiero ajustar la cantidad\n");
                 printf("[N]o, borrar de la factura\n");
-    
+
                 char option;
-                while (getchar() != '\n');
-                scanf("%c", &option);
+                char input[3];
+
+                while (1) {
+                    printf("Ingrese una opción: ");
+                    fgets(input, sizeof(input), stdin);
+
+                    if (sscanf(input, "%c", &option) == 1 && 
+                        (option == 's' || option == 'S' || option == 'n' || option == 'N')) {
+                        break; 
+                    } else {
+                        printf("❌ Entrada inválida. Por favor, ingrese 's' o 'n'.\n");
+                    }
+                }
             
                 if (option == 's' || option == 'S') {
 
@@ -238,7 +266,7 @@ void adjust_quantities(Quotation *quot) {
                     adjusted = true;
                 } else {
                     if (quot->num_lines <= 1) {
-                        printf("\nAdvertencia: La factura no puede quedar sin líneas\n");
+                        printf("\n⚠️ Advertencia: La factura no puede quedar sin líneas\n");
                     } else {
                         rm_product_from_quotation(ql->line_id);
                         i--;

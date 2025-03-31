@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <openssl/sha.h>
 #include "products.h"
 #include "quotations.h"
@@ -11,6 +13,8 @@
 #include "db_handler.h"
 
 #define HASH_SIZE SHA256_DIGEST_LENGTH
+#define MAX_USERNAME 30
+#define MAX_PASSWORD 30
 
 /*
         MAIN MENU
