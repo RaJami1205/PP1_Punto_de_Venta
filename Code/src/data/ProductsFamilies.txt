@@ -1,4 +1,4 @@
 Fam1,Enlatados
-Fam2,Granos básicos
+Fam2,Granos basicos
 Fam3,Bebidas
 Fam4,Snacks
