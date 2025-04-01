@@ -1,4 +1,4 @@
-<img src="https://upload.wikimedia.org/wikipedia/commons/1/19/C_Logo.png" alt="C" width="50" height="55">   <img src="https://upload.wikimedia.org/wikipedia/commons/0/0a/MySQL_textlogo.svg" alt="MySQL" width="100" height="50">  <img src="https://es.m.wikipedia.org/wiki/Archivo:Firma_TEC.svg" alt="tec" width="100" height="50">  
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/19/C_Logo.png" alt="C" width="50" height="55">   <img src="https://upload.wikimedia.org/wikipedia/commons/0/0a/MySQL_textlogo.svg" alt="MySQL" width="100" height="50">  
  
 # 🛒 Sistema de Punto de Venta
 ### Lenguajes de Programación 
@@ -21,10 +21,11 @@ Este proyecto consiste en el desarrollo de un **sistema de punto de venta en C**
    sudo apt install gcc
    ```
 2. Instala PostgreSQL o MySQL:
+   Para los scripts de sql se puede acceder a la carpeta de [Scripts](/Code/db)
    ```bash
    sudo apt install mysql-server # Para MySQL
    ```
-3. Clona el repositorio:
+4. Clona el repositorio:
    ```bash
    git clone https://github.com/RaJami1205/PP1_Punto_de_Venta.git
    cd repositorio
