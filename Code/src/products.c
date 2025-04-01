@@ -252,10 +252,15 @@ void delete_product() {
     // Pedir al usuario que ingrese el código del producto a eliminar
     char product_id[50];
     printf("Ingrese el ID del producto que desea eliminar: ");
-    if (scanf("%49s", product_id) != 1) {
+    
+    // Usar fgets para leer el ID del producto
+    if (fgets(product_id, sizeof(product_id), stdin) == NULL) {
         fprintf(stderr, "Error al leer el ID del producto.\n");
         return;
     }
+
+    // Eliminar el salto de línea al final que fgets agrega
+    product_id[strcspn(product_id, "\n")] = 0;
 
     MYSQL *conn = connect_to_db();
     if (conn == NULL) {
@@ -275,6 +280,7 @@ void delete_product() {
 }
 
 
+
 void loadProductStock(){
     Product products[MAX_LINES];
     char buffer[MAX_LENGTH]; // Buffer para leer cada línea
@@ -282,11 +288,12 @@ void loadProductStock(){
 
     char filename[100];
     printf("Ingrese la ruta del archivo: ");
-    scanf("%99s", filename);
-    
-    // Eliminar el salto de línea que fgets agrega
-    filename[strcspn(filename, "\n")] = 0;
-    
+    if (fgets(filename, sizeof(filename), stdin) == NULL) {
+        fprintf(stderr, "Error al leer la ruta del archivo\n");
+        return;
+    }
+    filename[strcspn(filename, "\n")] = 0; // Eliminar el salto de línea
+
     printf("Ruta ingresada: %s\n", filename); // Depuración
 
     FILE *file = fopen(filename, "r");
@@ -299,6 +306,7 @@ void loadProductStock(){
         char code[50];
         int stock;
         
+        // Leer la línea con fgets y procesarla con sscanf
         if (sscanf(buffer, "%49[^,],%d", code, &stock) >= 1) {
             strcpy(products[count].code, code);
             products[count].stock = stock;
@@ -310,7 +318,9 @@ void loadProductStock(){
 
     MYSQL *conn = connect_to_db();
 
+    // Actualizar el stock de productos en la base de datos
     update_stock_product(conn, products, &count);  
 
     mysql_close(conn);
 }
+
