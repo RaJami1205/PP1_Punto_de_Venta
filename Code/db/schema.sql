@@ -89,7 +89,8 @@ CREATE TABLE Invoice_Lines (
 INSERT INTO Users (username, password)
 VALUES ('admin', SHA2('1234', 256));
 
-INSERT INTO Sales_Point 
+INSERT INTO Sales_Point
     (name, legal_entity_id, phone_number)
 VALUES
     ('Mini Super El Exito', '11023456785', '+506 8764 3456');
+    

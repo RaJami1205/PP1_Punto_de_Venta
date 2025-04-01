@@ -60,6 +60,7 @@ BEGIN
     END IF;
 END $$
 
+-- Procedimiento almacenado para insertar un producto
 CREATE PROCEDURE insertNewProduct
 (
     IN p_product_id VARCHAR(50),
@@ -85,6 +86,7 @@ BEGIN
         (p_product_id, p_name, p_cost, p_price, p_stock, p_product_family_id);
 END $$
 
+-- Procedimiento almacenado para insertar una familia de producto
 CREATE PROCEDURE insertProductFamily
 (
     IN p_product_family_id VARCHAR(50),
@@ -108,6 +110,7 @@ BEGIN
     END IF;
 END $$
 
+-- Procedimiento almaceando
 CREATE PROCEDURE GetProductFamilyID(
     IN p_name VARCHAR(100),
     OUT p_id VARCHAR(50)
