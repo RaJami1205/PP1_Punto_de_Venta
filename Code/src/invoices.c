@@ -1,5 +1,181 @@
 #include "./include/invoices.h"
 
+bool check_invoices() {
+
+    MYSQL *conn = connect_to_db();
+    if (!conn) {
+        printf("\n❌ Error al conectar con la base de datos.\n");
+        return false;
+    }
+
+    MYSQL_RES *result = get_invoices(conn);
+    if (!result) {
+        printf("\n❌ Error al obtener las facturas.\n");
+        close_db_connection(conn);
+        return false;
+    }
+
+    if (mysql_num_rows(result) == 0) {
+        printf("\n❌ No hay facturas disponibles.\n");
+        mysql_free_result(result);
+        close_db_connection(conn);
+        return false;
+    }
+
+    MYSQL_ROW row;
+
+    printf("\nListado de Facturas\n");
+    printf("┌────────┬──────────────────────┬────────────────┬────────────────┬──────────────────┐\n");
+    printf("│ # Fact │ Fecha Y Hora         │ Subtotal       │ IVA            │ Total            │\n");
+    printf("├────────┼──────────────────────┼────────────────┼────────────────┼──────────────────┤\n");
+
+    while ((row = mysql_fetch_row(result))) {
+        printf("│ %-6s │ %-20s │ %-14s │ %-14s │ %-16s │\n",
+                row[0], row[2], row[4], row[5], row[6]);
+    }
+    printf("└────────┴──────────────────────┴────────────────┴────────────────┴──────────────────┘\n");
+
+    mysql_free_result(result);
+    
+    int invoice_id;
+    char input[20];
+
+    printf("Seleccione una factura mediante su ID para ver los detalles\n= ");
+    fgets(input, sizeof(input), stdin);
+
+    if (sscanf(input, "%d", &invoice_id) != 1 || invoice_id <= 0) {
+        printf("\n❌ ID de factura inválido.\n");
+        close_db_connection(conn);
+        return false;
+    }
+
+    if (search_invoice(invoice_id)) {
+        search_invoice_lines(invoice_id);
+        print_invoice();
+        close_db_connection(conn);
+        return true;
+    }
+
+    close_db_connection(conn);
+    return false;
+}
+
+
+bool search_invoice(int invoice_id) {
+    MYSQL *conn = connect_to_db();
+    if (!conn) {
+        printf("\n❌ Error al conectar con la base de datos.\n");
+        return false;
+    }
+
+    // Obtener cotización
+    MYSQL_RES *invoice_result = get_invoice_by_id(conn, invoice_id);
+    if (!invoice_result) {
+        printf("\n❌ No se encontró la factura con ID %d.\n", invoice_id);
+        close_db_connection(conn);
+        return false;
+    }
+
+    // Asignar datos de la cotización a current_quotation
+    MYSQL_ROW row = mysql_fetch_row(invoice_result);
+    if (!row) {
+        printf("\n❌ No se encontraron datos para la factura.\n");
+        mysql_free_result(invoice_result);
+        close_db_connection(conn);
+        return false;
+    }
+
+    current_invoice = (Invoice *)malloc(sizeof(Invoice));
+    if (current_invoice == NULL) {
+        printf("❌ Error: No se pudo asignar memoria para la factura.\n");
+        return false;
+    }
+
+    current_invoice->id = atoi(row[0]);
+    current_invoice->quotation_reference_id = atoi(row[1]);
+    strncpy(current_invoice->date, row[2], sizeof(current_invoice->date) - 1);
+    strncpy(current_invoice->customer_name, row[3], sizeof(current_invoice->customer_name) - 1);
+    current_invoice->sub_total = atof(row[4]);
+    current_invoice->total_taxes = atof(row[5]);
+    current_invoice->total = atof(row[6]);
+    current_invoice->num_lines = 0;
+    current_invoice->lines = NULL;
+
+    mysql_free_result(invoice_result);
+    close_db_connection(conn);
+    return true;
+}
+
+void search_invoice_lines(int invoice_id) {
+    MYSQL *conn = connect_to_db();
+    MYSQL_ROW row;
+    
+    // Obtener líneas de factura
+    MYSQL_RES *lines_result = get_invoice_lines(conn, invoice_id);
+    if (!lines_result) {
+        printf("\n❌ Error al obtener las líneas de la factura.\n");
+        close_db_connection(conn);
+        return;
+    }
+
+    int num_lines = mysql_num_rows(lines_result);
+    if (num_lines == 0) {
+        printf("\n❌ No hay líneas de factura para la factura ID %d.\n", invoice_id);
+        mysql_free_result(lines_result);
+        close_db_connection(conn);
+        return;
+    }
+
+    // Si se encuentran líneas, asignarlas a la estructura actual
+    current_invoice->lines = malloc(num_lines * sizeof(Invoice_Line));
+    if (!current_invoice->lines) {
+        printf("\n❌ Error al asignar memoria para las líneas de factura.\n");
+        mysql_free_result(lines_result);
+        close_db_connection(conn);
+        return;
+    }
+
+    int i = 0;
+    while ((row = mysql_fetch_row(lines_result))) {
+        current_invoice->lines[i].line_id = atoi(row[0]);
+        current_invoice->lines[i].invoice_id = atoi(row[1]);
+        strncpy(current_invoice->lines[i].product_name, row[2], sizeof(current_invoice->lines[i].product_name) - 1);
+        current_invoice->lines[i].quantity = atoi(row[3]);
+        current_invoice->lines[i].price = atof(row[4]);
+        current_invoice->lines[i].line_sub_total = atof(row[5]);
+        current_invoice->lines[i].line_total_taxes = atof(row[6]);
+        i++;
+    }
+    current_invoice->num_lines = num_lines;
+
+    mysql_free_result(lines_result);
+    close_db_connection(conn);
+}
+
+
+bool set_current_invoice() {
+    int invoice_id;
+    char input[20];
+
+    while (1) {
+
+        printf("Seleccione una factura mediante su ID\n= ");
+        fgets(input, sizeof(input), stdin);
+
+        if (sscanf(input, "%d", &invoice_id) == 1 && invoice_id > 0) {
+            break;
+        } else {
+            printf("\n\n❌ ID inválido. Intente de nuevo.\n\n");
+        }
+    }
+
+    if (search_invoice(invoice_id)) {
+        search_invoice_lines(invoice_id);
+        return true;
+    }
+    return false;
+}
+
 void invoices_menu() {
     printf("\nFacturar Cotización\n");
 
@@ -32,7 +208,7 @@ void invoices_menu() {
             break;
         case 2:
             seek_quotation();
-            break;
+            invoices_menu();
         case 3:
             print_general_submenu();
             break;
@@ -59,6 +235,7 @@ void close_invoice() {
     current_invoice->customer_name[strcspn(current_invoice->customer_name, "\n")] = '\0';  // Limpiar el salto de línea
 
     print_invoice();
+
 
     char option;
     char input[3];
@@ -281,5 +458,7 @@ void adjust_quantities(Quotation *quot) {
 void get_current_date(char *date_str) {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
-    sprintf(date_str, "%04d-%02d-%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+    sprintf(date_str, "%04d-%02d-%02d %02d:%02d:%02d", 
+            tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+            tm.tm_hour, tm.tm_min, tm.tm_sec);
 }

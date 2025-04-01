@@ -158,10 +158,10 @@ MYSQL_RES *get_products_by_family(MYSQL *conn, const char *family) {
     return mysql_store_result(conn);
 }
 
-void drop_product(MYSQL *conn, const char *code) {
+bool drop_product(MYSQL *conn, const char *code) {
     if (conn == NULL) {
         fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
-        return;
+        return false;
     }
 
     // Crear la consulta para llamar al procedimiento almacenado
@@ -171,7 +171,7 @@ void drop_product(MYSQL *conn, const char *code) {
     // Ejecutar la consulta
     if (mysql_query(conn, query)) {
         fprintf(stderr, "Error al ejecutar el procedimiento: %s\n", mysql_error(conn));
-        return;
+        return false;
     }
 
     // Obtener el resultado del mensaje del procedimiento almacenado
@@ -183,6 +183,7 @@ void drop_product(MYSQL *conn, const char *code) {
         }
         mysql_free_result(result);
     }
+    return true;
 }
 
 void update_stock_product(MYSQL *conn, Product *product, int *count) {
@@ -395,21 +396,72 @@ void create_invoice(MYSQL *conn, Invoice *invoice) {
 
 void add_line_to_invoice(MYSQL *conn, Invoice_Line *invoice_line) {
     char query[512];
+
     snprintf(query, sizeof(query), "CALL addLineToInvoice(%d, %d, '%s', %d, %.2f, %.2f)",
         invoice_line->line_id, invoice_line->invoice_id, 
         invoice_line->product_name, invoice_line->quantity, 
         invoice_line->line_sub_total, invoice_line->line_total_taxes);
 
     if (mysql_query(conn, query)) {
-        fprintf(stderr, "Error al ejecutar addLineToQuotation: %s\n", mysql_error(conn));
+        fprintf(stderr, "Error al ejecutar addLineToInvoice: %s\n", mysql_error(conn));
     }
 }
 
+MYSQL_RES *get_invoices(MYSQL *conn) {
+    if (!conn) {
+        fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
+        return NULL;
+    }
+
+    char query[256];
+    snprintf(query, sizeof(query), "CALL getInvoices()");
+
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error al ejecutar getInvoices: %s\n", mysql_error(conn));
+        return NULL;
+    }
+
+    return mysql_store_result(conn);
+}
+
+MYSQL_RES *get_invoice_by_id(MYSQL *conn, int invoice_id) {
+    if (!conn) {
+        fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
+        return NULL;
+    }
+
+    char query[256];
+    snprintf(query, sizeof(query), "CALL searchInvoice(%d)", invoice_id);
+
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error al ejecutar searchInvoice: %s\n", mysql_error(conn));
+        return NULL;
+    }
+    
+    return mysql_store_result(conn);
+}
+
+MYSQL_RES *get_invoice_lines(MYSQL *conn, int invoice_id) {
+    if (!conn) {
+        fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
+        return NULL;
+    }
+
+    char query[256];
+    snprintf(query, sizeof(query), "CALL searchInvoiceLines(%d)", invoice_id);
+
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error al ejecutar searchInvoiceLines: %s\n", mysql_error(conn));
+        return NULL;
+    }    
+    return mysql_store_result(conn);
+}
+
 /*
-==========================================================================
-                                LOGIN
-==========================================================================
-*/
+ ==========================================================================
+                                 LOGIN
+ ==========================================================================
+ */
 
 void hash_to_hex(const unsigned char *hash, char *hex_str, size_t length)
 {

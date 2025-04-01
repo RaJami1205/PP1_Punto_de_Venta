@@ -238,6 +238,12 @@ void rm_product_from_quotation(int line_to_remove) {
         return;
     }
 
+    if (current_quotation.num_lines == 1) {
+        printf("\n❌ No se puede eliminar la única línea en la cotización.\n");
+        print_quotation_menu();
+        return;
+    }
+
     char input[20];
 
     if (line_to_remove == 0) {
@@ -265,7 +271,6 @@ void rm_product_from_quotation(int line_to_remove) {
             return;
         }
     }
-    
 
     int index_to_remove = line_to_remove - 1;
     Quotation_Line *line = &current_quotation.lines[index_to_remove];
@@ -282,7 +287,7 @@ void rm_product_from_quotation(int line_to_remove) {
 
     // Acomodar los IDs de las líneas restantes
     for (int i = index_to_remove; i < current_quotation.num_lines - 1; i++) {
-        current_quotation.lines[i].line_id = i + 1;  // Reasignar los IDs (empezando desde 1)
+        current_quotation.lines[i].line_id = i + 1;
     }
 
     current_quotation.num_lines--;
@@ -361,6 +366,7 @@ void save_quotation() {
     }
 
     if (edit_quotation) {
+
         update_quotation(conn, &current_quotation);
 
         for (int i = 0; i < current_quotation.num_lines; i++) {
@@ -502,7 +508,7 @@ void new_quotation() {
     current_quotation.lines = NULL;
     edit_quotation = false;
 
-    printf("\nCOTIZACIÓN N°%d", current_quotation.id);
+    printf("\nCOTIZACIÓN N°%d\n", current_quotation.id);
     print_quotation_menu();
 }
 
