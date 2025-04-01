@@ -1,23 +1,23 @@
 #include "./include/products.h"
 
-void print_products() {
+bool print_products() {
     MYSQL *conn = connect_to_db();
     if (conn == NULL) {
         fprintf(stderr, "Error: No se pudo conectar a la base de datos\n");
-        return;
+        return false;
     }
 
     MYSQL_RES *res = get_all_products(conn);
     if (res == NULL) {
         mysql_close(conn);
-        return;
+        return false;
     }
 
     if (mysql_num_rows(res) == 0) {
         printf("No hay productos disponibles en la base de datos.\n");
         mysql_free_result(res);
         mysql_close(conn);
-        return;
+        return false;
     }
 
     MYSQL_ROW row;
@@ -45,6 +45,7 @@ void print_products() {
     
     mysql_free_result(res);
     mysql_close(conn);
+    return true;
 }
 
 void print_filtered_products() {
