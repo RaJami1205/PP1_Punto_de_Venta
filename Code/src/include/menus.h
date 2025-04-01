@@ -9,6 +9,7 @@
 #include "products.h"
 #include "quotations.h"
 #include "invoices.h"
+#include "statistics.h"
 #include "models.h"
 #include "db_handler.h"
 
@@ -40,6 +41,14 @@ void print_admin_submenu();
         GENERAL MENU
 */
 
+// Función para imprimir el menú general
 void print_general_submenu();
+
+/*
+        ESTADÍSTICAS MENU
+*/
+
+// Función para imprimir el menú de estadísticas
+void print_statistics_submenu();
 
 #endif /* MENUS_H */

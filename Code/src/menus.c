@@ -157,7 +157,7 @@ void print_admin_submenu() {
                 printf("Has seleccionado consultar factuuras.\n");
                 break;
             case 6:
-                printf("Has seleccionado Estadísticas.\n");
+                print_statistics_submenu();
                 break;
             case 7:
                 print_main_menu();
@@ -221,6 +221,71 @@ void print_general_submenu() {
                 return;
             default:
                 printf("❌ Opción inválida en el submenú de generales.\n");
+        }
+    }
+}
+
+/*
+==========================================================================
+                            Estadísticas MENU
+==========================================================================
+*/
+
+void print_statistics_submenu() {
+    char input[10];
+    int subopcion_E;
+
+    while (1) {
+        printf("\n");
+        printf("╔════════════════════════════════════════════════╗\n");
+        printf("║            📊 Estadísticas Generales           ║\n");
+        printf("╠════════════════════════════════════════════════╣\n");
+        printf("║                    OPCIONES                    ║\n");
+        printf("║                                                ║\n");
+        printf("║   [1] 📋 Cantidad de Cotizaciones Pendientes   ║\n");
+        printf("║   [2] 💼 Cantidad de Cotizaciones Facturadas   ║\n");
+        printf("║   [3] 📈 Promedio de Compra                    ║\n");
+        printf("║   [4] 🔝 Top 5 Productos más Vendidos          ║\n");
+        printf("║   [5] 🏷️  Productos más Vendidos por Familia    ║\n");
+        printf("║   [6] 💵 Monto Total Vendido por Familia       ║\n");
+        printf("║   [7] 🔙 Regresar                              ║\n");
+        printf("╚════════════════════════════════════════════════╝\n");
+
+        printf("\nIngrese la opción: ");
+        fgets(input, sizeof(input), stdin);
+
+        char *endptr;
+        subopcion_E = strtol(input, &endptr, 10);
+
+        if (*endptr != '\n' && *endptr != '\0') {
+            printf("❌ Entrada inválida. Por favor, ingrese un número.\n");
+            continue;
+        }
+
+        switch (subopcion_E) {
+            case 1:
+                print_pending_quotations();
+                break;
+            case 2:
+                print_quotations_with_invoices();
+                break;
+            case 3:
+                print_total_purchase_average();
+                break;
+            case 4:
+                print_top_5_selling_products();
+                break;
+            case 5:
+                print_top_product_per_family();
+                break;
+            case 6:
+                print_total_sales_per_family();
+                break;
+            case 7:
+                print_admin_submenu();
+                break;
+            default:
+                printf("❌ Opción inválida en el submenú de estadísticas.\n");
         }
     }
 }

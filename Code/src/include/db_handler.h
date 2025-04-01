@@ -115,4 +115,27 @@ void hash_to_hex(const unsigned char *hash, char *hex_str, size_t length);
 // Función para verificar login
 bool validate_credentials(MYSQL *conn, const char *username, unsigned char *password);
 
+/*
+==========================================================================
+                              ESTADÍSTICAS
+==========================================================================
+*/
+// Función para llamar a la vista de la cantidad de cotizaciones pendientes
+void view_pending_quotations(MYSQL *conn);
+
+// Función para llamar a la vista de la cantidad de cotizaciones facturadas
+void view_quotations_with_invoices(MYSQL *conn);
+
+// Función para llamar a la vista del promedio de compra total
+void view_total_purchase_average(MYSQL *conn);
+
+// Función para llamar a la vista de los 5 productos más vendidos
+void view_top_5_selling_products(MYSQL *conn);
+
+// Función para llamar a la vista de los productos más vendidos por familia
+void view_top_product_per_family(MYSQL *conn);
+
+// Función para llamar a la vista de los montos vendidos por familia
+void view_total_sales_per_family(MYSQL *conn);
+
 #endif /* DB_HANDLER_H */
