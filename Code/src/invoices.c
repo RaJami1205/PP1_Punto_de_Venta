@@ -402,6 +402,7 @@ void adjust_quantities(Quotation *quot) {
         if (ql->quantity > product_stock) {
             adjusted = false;
 
+
             while (!adjusted) {
                 printf("La línea N°%d %s cotiza %d unidades, pero en stock hay únicamente %d\n", 
                        ql->line_id, ql->product_name, ql->quantity, product_stock);
@@ -422,25 +423,30 @@ void adjust_quantities(Quotation *quot) {
                     } else {
                         printf("❌ Entrada inválida. Por favor, ingrese 's' o 'n'.\n");
                     }
+
+
                 }
             
                 if (option == 's' || option == 'S') {
 
-                    
-                    ql->quantity = product_stock;
+                    if (product_stock <= 0) {
+                        printf("❌ Entrada inválida. No se puede ajustar a 0.\n");
+                    } else {
+                        ql->quantity = product_stock;
 
-                    quot->sub_total -= ql->line_sub_total;
-                    quot->total_taxes -= ql->line_total_taxes;
-                    quot->total -= ql->line_sub_total + ql->line_total_taxes;
-
-                    ql->line_sub_total = ql->quantity * ql->price;
-                    ql->line_total_taxes = ql->line_sub_total * 0.13;
-
-                    quot->sub_total += ql->line_sub_total;
-                    quot->total_taxes += ql->line_total_taxes;
-                    quot->total += ql->line_sub_total + ql->line_total_taxes;
-
-                    adjusted = true;
+                        quot->sub_total -= ql->line_sub_total;
+                        quot->total_taxes -= ql->line_total_taxes;
+                        quot->total -= ql->line_sub_total + ql->line_total_taxes;
+    
+                        ql->line_sub_total = ql->quantity * ql->price;
+                        ql->line_total_taxes = ql->line_sub_total * 0.13;
+    
+                        quot->sub_total += ql->line_sub_total;
+                        quot->total_taxes += ql->line_total_taxes;
+                        quot->total += ql->line_sub_total + ql->line_total_taxes;
+    
+                        adjusted = true;
+                    }
                 } else {
                     if (quot->num_lines <= 1) {
                         printf("\n⚠️ Advertencia: La factura no puede quedar sin líneas\n");
