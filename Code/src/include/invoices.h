@@ -13,6 +13,15 @@
 static Invoice *current_invoice;
 static Sales_Point sales_point;
 
+// Función para consultar facturas
+bool check_invoices();
+
+// Buscar factura mediante su id
+bool search_invoice(int invoice_id);
+
+// Busca las líneas de una facturacion mediante el id
+void search_invoice_lines(int invoice_id);
+
 // Menú para facturación
 void invoices_menu();
 

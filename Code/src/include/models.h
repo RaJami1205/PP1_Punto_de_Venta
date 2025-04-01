@@ -68,7 +68,7 @@ typedef struct {
 typedef struct {
     int id;
     char customer_name[100]; 
-    char date[11];
+    char date[50];
     int quotation_reference_id;
     float sub_total;
     float total_taxes;

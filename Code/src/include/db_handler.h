@@ -52,7 +52,7 @@ MYSQL_RES* get_all_products(MYSQL *conn);
 MYSQL_RES *get_products_by_family(MYSQL *conn, const char *family);
 
 //Función para eliminar un producto
-void drop_product(MYSQL *conn, const char *code);
+bool drop_product(MYSQL *conn, const char *code);
 
 // Función para aumentar la cantidad en stock de los productos
 void update_stock_product(MYSQL *conn, Product *product, int *count);
@@ -103,6 +103,15 @@ void create_invoice(MYSQL *conn, Invoice *invoice);
 
 // Función para agregar nueva linea a la factura
 void add_line_to_invoice(MYSQL *conn, Invoice_Line *invoice_line);
+
+// Función para recuperar facturas de la bd
+MYSQL_RES *get_invoices(MYSQL *conn);
+
+// Función para buscar cotización
+MYSQL_RES *get_invoice_by_id(MYSQL *conn, int invoice_id);
+
+// Función para obtener líneas de cotización
+MYSQL_RES *get_invoice_lines(MYSQL *conn, int invoice_id);
 
 /*
 ==========================================================================

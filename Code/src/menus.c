@@ -154,7 +154,7 @@ void print_admin_submenu() {
                 loadProductStock();
                 break;
             case 5:
-                printf("Has seleccionado consultar factuuras.\n");
+                check_invoices();
                 break;
             case 6:
                 print_statistics_submenu();

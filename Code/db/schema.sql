@@ -63,7 +63,7 @@ CREATE TABLE Quotation_Lines (
 CREATE TABLE Invoice (
     invoice_id              INT  NOT NULL AUTO_INCREMENT,
     quotation_reference_id  INT,
-    date                    DATE NOT NULL,
+    date                    DATETIME NOT NULL,
     customer_name           VARCHAR(100)  NOT NULL,
     sub_total               DECIMAL(15,2) NOT NULL ,
     total_taxes             DECIMAL(15,2) NOT NULL,

@@ -8,8 +8,6 @@ DROP PROCEDURE IF EXISTS deleteProductById $$
 DROP PROCEDURE IF EXISTS insertNewProduct $$
 DROP PROCEDURE IF EXISTS insertProductFamily $$
 DROP PROCEDURE IF EXISTS GetProductFamilyID $$
-DROP PROCEDURE IF EXISTS GetProductStock $$
-DROP PROCEDURE IF EXISTS UpdateProductStock $$
 DROP PROCEDURE IF EXISTS searchProduct $$
 DROP PROCEDURE IF EXISTS getLastQuotId $$
 DROP PROCEDURE IF EXISTS filterProductsByFamily $$
@@ -24,6 +22,9 @@ DROP PROCEDURE IF EXISTS deleteQuotationLinesFromId $$
 DROP PROCEDURE IF EXISTS getLastInvoiceId $$
 DROP PROCEDURE IF EXISTS createInvoice $$
 DROP PROCEDURE IF EXISTS addLineToInvoice $$
+DROP PROCEDURE IF EXISTS getInvoices $$
+DROP PROCEDURE IF EXISTS searchInvoice $$
+DROP PROCEDURE IF EXISTS searchInvoiceLines $$
 
 
 -- Procedimiento para obtener la información del punto de venta
@@ -152,28 +153,6 @@ BEGIN
         LEFT JOIN Product_Family pf ON p.product_family_id = pf.product_family_id
         WHERE p.name = p_search_value;
     END IF;
-END $$
-
--- Procedimiento para obtener el stock actual del producto
-CREATE PROCEDURE GetProductStock(
-    IN p_product_id VARCHAR(50),
-    OUT p_current_stock INT
-)
-BEGIN
-    SELECT stock INTO p_current_stock
-    FROM Product
-    WHERE product_id = p_product_id;
-END $$
-
--- Procedimiento para actualizar el stock del producto
-CREATE PROCEDURE UpdateProductStock(
-    IN p_product_id VARCHAR(50),
-    IN p_new_stock INT
-)
-BEGIN
-    UPDATE Product
-    SET stock = p_new_stock
-    WHERE product_id = p_product_id;
 END $$
 
 -- Procedimiento para obtener el último ID de cotización
@@ -338,7 +317,7 @@ CREATE PROCEDURE deleteQuotationLinesFromId
 )
 BEGIN
     DELETE FROM Quotation_Lines
-    WHERE quotation_id = p_quot_id AND quotation_line_id > p_id_from;
+    WHERE quotation_id = p_quot_id AND quotation_line_id >= p_id_from;
 END $$
 
 -- Procedimiento para obtener el último ID de factura
@@ -352,7 +331,7 @@ END $$
 CREATE PROCEDURE createInvoice
 (
 	IN p_quot_reference_id INT,
-    IN p_date DATE,
+    IN p_date DATETIME,
     IN p_customer_name VARCHAR(100),
     IN p_sub_total FLOAT,
     IN p_total_taxes FLOAT
@@ -395,6 +374,36 @@ BEGIN
         SET stock = stock - p_qty
         WHERE product_id = p_product_id;
     END IF;
+END $$
+
+-- Procedimiento para obtener facturas
+CREATE PROCEDURE getInvoices ()
+BEGIN
+    SELECT invoice_id, quotation_reference_id, date, customer_name, sub_total, total_taxes, total
+    FROM Invoice;
+END $$
+
+-- Procedimiento para buscar una factura por ID
+CREATE PROCEDURE searchInvoice
+(
+    IN p_invoice_id INT
+)
+BEGIN
+    SELECT invoice_id, quotation_reference_id, date, customer_name, sub_total, total_taxes, total
+    FROM Invoice
+    WHERE invoice_id = p_invoice_id;
+END $$
+
+-- Procedimiento para buscar líneas de cotización por ID de cotización
+CREATE PROCEDURE searchInvoiceLines
+(
+    IN p_invoice_id INT
+)
+BEGIN
+    SELECT il.invoice_line_id, il.invoice_id, p.name, il.quantity, p.price, il.line_sub_total, il.line_total_taxes
+    FROM Invoice_Lines il
+    LEFT JOIN Product p ON p.product_id = il.product_id
+    WHERE invoice_id = p_invoice_id;
 END $$
 
 DELIMITER ;

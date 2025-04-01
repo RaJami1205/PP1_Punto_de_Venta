@@ -158,10 +158,10 @@ MYSQL_RES *get_products_by_family(MYSQL *conn, const char *family) {
     return mysql_store_result(conn);
 }
 
-void drop_product(MYSQL *conn, const char *code) {
+bool drop_product(MYSQL *conn, const char *code) {
     if (conn == NULL) {
         fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
-        return;
+        return false;
     }
 
     // Crear la consulta para llamar al procedimiento almacenado
@@ -171,7 +171,7 @@ void drop_product(MYSQL *conn, const char *code) {
     // Ejecutar la consulta
     if (mysql_query(conn, query)) {
         fprintf(stderr, "Error al ejecutar el procedimiento: %s\n", mysql_error(conn));
-        return;
+        return false;
     }
 
     // Obtener el resultado del mensaje del procedimiento almacenado
@@ -183,6 +183,7 @@ void drop_product(MYSQL *conn, const char *code) {
         }
         mysql_free_result(result);
     }
+    return true;
 }
 
 void update_stock_product(MYSQL *conn, Product *product, int *count) {
@@ -395,244 +396,72 @@ void create_invoice(MYSQL *conn, Invoice *invoice) {
 
 void add_line_to_invoice(MYSQL *conn, Invoice_Line *invoice_line) {
     char query[512];
+
     snprintf(query, sizeof(query), "CALL addLineToInvoice(%d, %d, '%s', %d, %.2f, %.2f)",
         invoice_line->line_id, invoice_line->invoice_id, 
         invoice_line->product_name, invoice_line->quantity, 
         invoice_line->line_sub_total, invoice_line->line_total_taxes);
 
     if (mysql_query(conn, query)) {
-        fprintf(stderr, "Error al ejecutar addLineToQuotation: %s\n", mysql_error(conn));
+        fprintf(stderr, "Error al ejecutar addLineToInvoice: %s\n", mysql_error(conn));
     }
 }
 
-/*
-==========================================================================
-                              ESTADÍSTICAS
-==========================================================================
-*/
-void view_pending_quotations(MYSQL *conn){
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    const char *query = "SELECT * FROM Pending_Quotations";
+MYSQL_RES *get_invoices(MYSQL *conn) {
+    if (!conn) {
+        fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
+        return NULL;
+    }
 
-    // Ejecutar la consulta
+    char query[256];
+    snprintf(query, sizeof(query), "CALL getInvoices()");
+
     if (mysql_query(conn, query)) {
-        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
-        return;
+        fprintf(stderr, "Error al ejecutar getInvoices: %s\n", mysql_error(conn));
+        return NULL;
     }
 
-    // Obtener los resultados
-    res = mysql_store_result(conn);
-    if (res == NULL) {
-        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
-        return;
+    return mysql_store_result(conn);
+}
+
+MYSQL_RES *get_invoice_by_id(MYSQL *conn, int invoice_id) {
+    if (!conn) {
+        fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
+        return NULL;
     }
 
-    // Verificar si hay resultados
-    if (mysql_num_rows(res) == 0) {
-        printf("No hay cotizaciones pendientes.\n");
-    } else {
-        // Imprimir los resultados
-        row = mysql_fetch_row(res);
-        if (row != NULL) {
-            printf("Cantidad de cotizaciones pendientes: %s\n", row[0]);
-        }
-    }
+    char query[256];
+    snprintf(query, sizeof(query), "CALL searchInvoice(%d)", invoice_id);
 
-    // Liberar los resultados
-    mysql_free_result(res);
-};
-
-void view_quotations_with_invoices(MYSQL *conn){
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    const char *query = "SELECT * FROM Quotation_With_Invoice";
-
-    // Ejecutar la consulta
     if (mysql_query(conn, query)) {
-        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
-        return;
+        fprintf(stderr, "Error al ejecutar searchInvoice: %s\n", mysql_error(conn));
+        return NULL;
+    }
+    
+    return mysql_store_result(conn);
+}
+
+MYSQL_RES *get_invoice_lines(MYSQL *conn, int invoice_id) {
+    if (!conn) {
+        fprintf(stderr, "Error: Conexión a la base de datos no válida.\n");
+        return NULL;
     }
 
-    // Obtener los resultados
-    res = mysql_store_result(conn);
-    if (res == NULL) {
-        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
-        return;
-    }
+    char query[256];
+    snprintf(query, sizeof(query), "CALL searchInvoiceLines(%d)", invoice_id);
 
-    // Verificar si hay resultados
-    if (mysql_num_rows(res) == 0) {
-        printf("No hay cotizaciones facturadas.\n");
-    } else {
-        // Imprimir los resultados
-        row = mysql_fetch_row(res);
-        if (row != NULL) {
-            printf("Cantidad de cotizaciones facturadas: %s\n", row[0]);
-        }
-    }
-
-    // Liberar los resultados
-    mysql_free_result(res);
-};
-
-void view_total_purchase_average(MYSQL *conn){
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    const char *query = "SELECT * FROM Average_Invoice_Total";
-
-    // Ejecutar la consulta
     if (mysql_query(conn, query)) {
-        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
-        return;
-    }
-
-    // Obtener los resultados
-    res = mysql_store_result(conn);
-    if (res == NULL) {
-        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
-        return;
-    }
-
-    // Verificar si hay resultados
-    if (mysql_num_rows(res) == 0) {
-        printf("No hay información disponible para el promedio de compras.\n");
-    } else {
-        // Imprimir los resultados
-        row = mysql_fetch_row(res);
-        if (row != NULL) {
-            printf("Promedio total de compra: %s\n", row[0]);
-        }
-    }
-
-    // Liberar los resultados
-    mysql_free_result(res);
-};
-
-void view_top_5_selling_products(MYSQL *conn){
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    const char *query = "SELECT * FROM Top_5_Selling_Products";
-
-    // Ejecutar la consulta
-    if (mysql_query(conn, query)) {
-        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
-        return;
-    }
-
-    // Obtener los resultados
-    res = mysql_store_result(conn);
-    if (res == NULL) {
-        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
-        return;
-    }
-
-    // Verificar si hay resultados
-    if (mysql_num_rows(res) == 0) {
-        printf("No se encontraron productos más vendidos.\n");
-    } else {
-        // Imprimir los resultados
-        printf("Top 5 productos más vendidos:\n");
-        printf("-------------------------------------------------\n");
-        printf("| Producto              | Cantidad Vendida     |\n");
-        printf("-------------------------------------------------\n");
-
-        // Recorrer todas las filas
-        while ((row = mysql_fetch_row(res)) != NULL) {
-            printf("| %-20s | %-20s |\n", row[0], row[1]);
-        }
-        printf("-------------------------------------------------\n");
-    }
-
-    // Liberar los resultados
-    mysql_free_result(res);
-};
-
-void view_top_product_per_family(MYSQL *conn){
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    const char *query = "SELECT * FROM Top_Product_Per_Family";
-
-    // Ejecutar la consulta
-    if (mysql_query(conn, query)) {
-        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
-        return;
-    }
-
-    // Obtener los resultados
-    res = mysql_store_result(conn);
-    if (res == NULL) {
-        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
-        return;
-    }
-
-    // Verificar si hay resultados
-    if (mysql_num_rows(res) == 0) {
-        printf("No se encontraron productos más vendidos por familia.\n");
-    } else {
-        // Imprimir los resultados
-        printf("Top producto por familia:\n");
-        printf("--------------------------------------------------------------\n");
-        printf("| Familia de Producto     | Producto más vendido | Cantidad Vendida |\n");
-        printf("--------------------------------------------------------------\n");
-
-        // Recorrer todas las filas y mostrar la información
-        while ((row = mysql_fetch_row(res)) != NULL) {
-            printf("| %-22s | %-21s | %-17s |\n", row[0], row[1], row[2]);
-        }
-
-        printf("--------------------------------------------------------------\n");
-    }
-
-    // Liberar los resultados
-    mysql_free_result(res);
-};
-
-void view_total_sales_per_family(MYSQL *conn){
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    const char *query = "SELECT * FROM Total_Sales_Per_Family";
-
-    // Ejecutar la consulta
-    if (mysql_query(conn, query)) {
-        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
-        return;
-    }
-
-    // Obtener los resultados
-    res = mysql_store_result(conn);
-    if (res == NULL) {
-        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
-        return;
-    }
-
-    // Verificar si hay resultados
-    if (mysql_num_rows(res) == 0) {
-        printf("No se encontraron ventas por familia de producto.\n");
-    } else {
-        // Imprimir los resultados
-        printf("Ventas totales por familia de producto:\n");
-        printf("-------------------------------------------------------------\n");
-        printf("| Familia de Producto     | Total de Ventas         |\n");
-        printf("-------------------------------------------------------------\n");
-
-        // Recorrer todas las filas y mostrar la información
-        while ((row = mysql_fetch_row(res)) != NULL) {
-            printf("| %-22s | %-22s |\n", row[0], row[1]);
-        }
-
-        printf("-------------------------------------------------------------\n");
-    }
-
-    // Liberar los resultados
-    mysql_free_result(res);
-};
+        fprintf(stderr, "Error al ejecutar searchInvoiceLines: %s\n", mysql_error(conn));
+        return NULL;
+    }    
+    return mysql_store_result(conn);
+}
 
 /*
-==========================================================================
-                                LOGIN
-==========================================================================
-*/
+ ==========================================================================
+                                 LOGIN
+ ==========================================================================
+ */
 
 void hash_to_hex(const unsigned char *hash, char *hex_str, size_t length)
 {

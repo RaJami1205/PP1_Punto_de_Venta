@@ -93,12 +93,16 @@ void print_filtered_products() {
 
 void set_product_family() {
     Product_Family product_family[MAX_LINES];
-    char buffer[MAX_LENGTH]; // Buffer para leer cada línea
+    char buffer[MAX_LENGTH];
     int count = 0;
 
     char filename[100];
     printf("Ingrese la ruta del archivo: ");
-    scanf("%99s", filename);
+    if (fgets(filename, sizeof(filename), stdin) == NULL) {
+        fprintf(stderr, "Error al leer la ruta del archivo\n");
+        return;
+    }
+    filename[strcspn(filename, "\n")] = 0; // Eliminar el salto de línea
 
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -113,9 +117,16 @@ void set_product_family() {
         char *code = strtok(buffer, ",");
         char *name = strtok(NULL, ",");
 
+        // Validar que ambos campos existen
         if (code == NULL || name == NULL) {
-            fprintf(stderr, "Error: línea inválida en el archivo\n");
+            fprintf(stderr, "Error: línea inválida en el archivo. Se esperaba 'código,nombre'.\n");
             continue; // Saltar esta línea si el formato no es correcto
+        }
+
+        // Validar que los datos no están vacíos
+        if (strlen(code) == 0 || strlen(name) == 0) {
+            fprintf(stderr, "Error: Código o nombre vacío en la línea. Se ignorará.\n");
+            continue; // Ignorar esta línea si algún dato está vacío
         }
 
         // Copiar los valores a la estructura
@@ -130,6 +141,11 @@ void set_product_family() {
 
     fclose(file);
 
+    if (count == 0) {
+        printf("No se cargaron datos debido a errores en el archivo.\n");
+        return;
+    }
+
     // Conectar a la base de datos
     MYSQL *conn = connect_to_db();
     if (conn == NULL) {
@@ -139,8 +155,10 @@ void set_product_family() {
 
     // Insertar en la base de datos
     for (int i = 0; i < count; i++) {
-        if(!insert_product_family(conn, product_family[i].code, product_family[i].name)) {
+        if (!insert_product_family(conn, product_family[i].code, product_family[i].name)) {
             printf("%s %s no pudo ser cargado.\n", product_family[i].code, product_family[i].name);
+        } else {
+            printf("%s %s cargada correctamente.\n", product_family[i].code, product_family[i].name);
         }
     }
 
@@ -155,17 +173,21 @@ void set_product() {
 
     char filename[100];
     printf("Ingrese la ruta del archivo: ");
-    scanf("%99s", filename);
+    if (fgets(filename, sizeof(filename), stdin) == NULL) {
+        fprintf(stderr, "Error al leer la ruta del archivo\n");
+        return;
+    }
+    filename[strcspn(filename, "\n")] = 0; // Eliminar el salto de línea al final de la ruta
 
-    FILE *file = fopen(filename, "r"); 
+    FILE *file = fopen(filename, "r");
     if (file == NULL) {
         perror("Error al abrir el archivo");
         return;
     }
-    
+
     // Leer los productos del archivo
     while (fgets(buffer, sizeof(buffer), file) && count < MAX_LINES) {
-        buffer[strcspn(buffer, "\n")] = 0;  // Eliminar el salto de línea
+        buffer[strcspn(buffer, "\n")] = 0; // Eliminar salto de línea
 
         // Usar sscanf correctamente para leer los valores
         int n = sscanf(buffer, "%49[^,],%99[^,],%49[^,],%f,%f,%d", 
@@ -178,21 +200,42 @@ void set_product() {
 
         // Verificar que se leyeron todos los valores correctamente
         if (n != 6) {
-            printf("Error al leer la línea: %s\n", buffer);
-        } else {
-            count++;
+            fprintf(stderr, "Error al leer la línea: %s\n", buffer);
+            continue; // Continuar con la siguiente línea si hay error
         }
+
+        // Validación adicional de los valores
+        if (strlen(products[count].code) == 0 || strlen(products[count].name) == 0 ||
+            strlen(products[count].family) == 0 || products[count].cost <= 0 ||
+            products[count].price <= 0 || products[count].stock < 0) {
+            fprintf(stderr, "Datos inválidos en la línea: %s\n", buffer);
+            continue; // Continuar con la siguiente línea si los datos son inválidos
+        }
+
+        count++;
     }
 
     fclose(file);
 
+    // Verificar si se cargaron productos
+    if (count == 0) {
+        printf("No se cargaron productos válidos desde el archivo.\n");
+        return;
+    }
+
     // Conectar a la base de datos
     MYSQL *conn = connect_to_db();
+    if (conn == NULL) {
+        fprintf(stderr, "Error: No se pudo conectar a la base de datos\n");
+        return;
+    }
 
     // Insertar los productos en la base de datos
     for (int i = 0; i < count; i++) {
-        if(!insert_product(conn, &products[i])) {
-            printf("%s %s no pudo ser cargado.\n", products[i].family, products[i].name);
+        if (!insert_product(conn, &products[i])) {
+            printf("%s %s no pudo ser cargado.\n", products[i].code, products[i].name);
+        } else {
+            printf("%s %s cargado correctamente.\n", products[i].code, products[i].name);
         }
     }
 
@@ -201,21 +244,33 @@ void set_product() {
 }
 
 void delete_product() {
-
     print_products();
 
     // Pedir al usuario que ingrese el código del producto a eliminar
     char product_id[50];
     printf("Ingrese el ID del producto que desea eliminar: ");
-    scanf("%49s", product_id);
+    if (scanf("%49s", product_id) != 1) {
+        fprintf(stderr, "Error al leer el ID del producto.\n");
+        return;
+    }
 
     MYSQL *conn = connect_to_db();
+    if (conn == NULL) {
+        fprintf(stderr, "Error: No se pudo conectar a la base de datos.\n");
+        return;
+    }
 
-    drop_product(conn, product_id);
+    // Intentar eliminar el producto y verificar si se realizó correctamente
+    if (drop_product(conn, product_id)) {
+        printf("Producto con ID %s eliminado correctamente.\n", product_id);
+    } else {
+        printf("No se pudo eliminar el producto con ID %s. Puede que no exista.\n", product_id);
+    }
 
     // Cerrar la conexión
     mysql_close(conn);
 }
+
 
 void loadProductStock(){
     Product products[MAX_LINES];
