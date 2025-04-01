@@ -458,6 +458,229 @@ MYSQL_RES *get_invoice_lines(MYSQL *conn, int invoice_id) {
 }
 
 /*
+==========================================================================
+                              ESTADÍSTICAS
+==========================================================================
+*/
+void view_pending_quotations(MYSQL *conn){
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+    const char *query = "SELECT * FROM Pending_Quotations";
+
+    // Ejecutar la consulta
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Obtener los resultados
+    res = mysql_store_result(conn);
+    if (res == NULL) {
+        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Verificar si hay resultados
+    if (mysql_num_rows(res) == 0) {
+        printf("No hay cotizaciones pendientes.\n");
+    } else {
+        // Imprimir los resultados
+        row = mysql_fetch_row(res);
+        if (row != NULL) {
+            printf("Cantidad de cotizaciones pendientes: %s\n", row[0]);
+        }
+    }
+
+    // Liberar los resultados
+    mysql_free_result(res);
+};
+
+void view_quotations_with_invoices(MYSQL *conn){
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+    const char *query = "SELECT * FROM Quotation_With_Invoice";
+
+    // Ejecutar la consulta
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Obtener los resultados
+    res = mysql_store_result(conn);
+    if (res == NULL) {
+        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Verificar si hay resultados
+    if (mysql_num_rows(res) == 0) {
+        printf("No hay cotizaciones facturadas.\n");
+    } else {
+        // Imprimir los resultados
+        row = mysql_fetch_row(res);
+        if (row != NULL) {
+            printf("Cantidad de cotizaciones facturadas: %s\n", row[0]);
+        }
+    }
+
+    // Liberar los resultados
+    mysql_free_result(res);
+};
+
+void view_total_purchase_average(MYSQL *conn){
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+    const char *query = "SELECT * FROM Average_Invoice_Total";
+
+    // Ejecutar la consulta
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Obtener los resultados
+    res = mysql_store_result(conn);
+    if (res == NULL) {
+        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Verificar si hay resultados
+    if (mysql_num_rows(res) == 0) {
+        printf("No hay información disponible para el promedio de compras.\n");
+    } else {
+        // Imprimir los resultados
+        row = mysql_fetch_row(res);
+        if (row != NULL) {
+            printf("Promedio total de compra: %s\n", row[0]);
+        }
+    }
+
+    // Liberar los resultados
+    mysql_free_result(res);
+};
+
+void view_top_5_selling_products(MYSQL *conn){
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+    const char *query = "SELECT * FROM Top_5_Selling_Products";
+
+    // Ejecutar la consulta
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Obtener los resultados
+    res = mysql_store_result(conn);
+    if (res == NULL) {
+        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Verificar si hay resultados
+    if (mysql_num_rows(res) == 0) {
+        printf("No se encontraron productos más vendidos.\n");
+    } else {
+        // Imprimir los resultados
+        printf("Top 5 productos más vendidos:\n");
+        printf("-------------------------------------------------\n");
+        printf("| Producto              | Cantidad Vendida     |\n");
+        printf("-------------------------------------------------\n");
+
+        // Recorrer todas las filas
+        while ((row = mysql_fetch_row(res)) != NULL) {
+            printf("| %-20s | %-20s |\n", row[0], row[1]);
+        }
+        printf("-------------------------------------------------\n");
+    }
+
+    // Liberar los resultados
+    mysql_free_result(res);
+};
+
+void view_top_product_per_family(MYSQL *conn){
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+    const char *query = "SELECT * FROM Top_Product_Per_Family";
+
+    // Ejecutar la consulta
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Obtener los resultados
+    res = mysql_store_result(conn);
+    if (res == NULL) {
+        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Verificar si hay resultados
+    if (mysql_num_rows(res) == 0) {
+        printf("No se encontraron productos más vendidos por familia.\n");
+    } else {
+        // Imprimir los resultados
+        printf("Top producto por familia:\n");
+        printf("--------------------------------------------------------------\n");
+        printf("| Familia de Producto     | Producto más vendido | Cantidad Vendida |\n");
+        printf("--------------------------------------------------------------\n");
+
+        // Recorrer todas las filas y mostrar la información
+        while ((row = mysql_fetch_row(res)) != NULL) {
+            printf("| %-22s | %-21s | %-17s |\n", row[0], row[1], row[2]);
+        }
+
+        printf("--------------------------------------------------------------\n");
+    }
+
+    // Liberar los resultados
+    mysql_free_result(res);
+};
+
+void view_total_sales_per_family(MYSQL *conn){
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+    const char *query = "SELECT * FROM Total_Sales_Per_Family";
+
+    // Ejecutar la consulta
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "Error en la consulta: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Obtener los resultados
+    res = mysql_store_result(conn);
+    if (res == NULL) {
+        fprintf(stderr, "Error al obtener resultados: %s\n", mysql_error(conn));
+        return;
+    }
+
+    // Verificar si hay resultados
+    if (mysql_num_rows(res) == 0) {
+        printf("No se encontraron ventas por familia de producto.\n");
+    } else {
+        // Imprimir los resultados
+        printf("Ventas totales por familia de producto:\n");
+        printf("-------------------------------------------------------------\n");
+        printf("| Familia de Producto     | Total de Ventas         |\n");
+        printf("-------------------------------------------------------------\n");
+
+        // Recorrer todas las filas y mostrar la información
+        while ((row = mysql_fetch_row(res)) != NULL) {
+            printf("| %-22s | %-22s |\n", row[0], row[1]);
+        }
+
+        printf("-------------------------------------------------------------\n");
+    }
+
+    // Liberar los resultados
+    mysql_free_result(res);
+};
+
+/*
  ==========================================================================
                                  LOGIN
  ==========================================================================
