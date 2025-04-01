@@ -245,7 +245,9 @@ void set_product() {
 }
 
 void delete_product() {
-    print_products();
+    if (!print_products()){
+        return;
+    }
 
     // Pedir al usuario que ingrese el código del producto a eliminar
     char product_id[50];
