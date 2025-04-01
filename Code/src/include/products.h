@@ -12,7 +12,7 @@
 #define MAX_LENGTH 100
 
 // Función para imprimir productos en catálogo
-void print_products();
+bool print_products();
 
 // Función para preguntar al usuario método de filtrado de productos y printearlos
 void print_filtered_products();
